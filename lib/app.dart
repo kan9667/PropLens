@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'data/properties.dart';
 import 'widgets/property_card.dart';
+import 'widgets/property_grid.dart';
 
 class Ghar360App extends StatelessWidget {
   const Ghar360App({super.key});
@@ -20,11 +21,7 @@ class Ghar360App extends StatelessWidget {
   appBar: AppBar(
     title: const Text('360 Ghar'),
   ),
-  body: Center(
-    child: PropertyCard(
-      property: mockProperties.first,
-    ),
-  ),
+  body: const PropertyGrid(),
 ),
     );
   }
