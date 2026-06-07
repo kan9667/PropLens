@@ -1,0 +1,1 @@
+//stores app state- Provider provides centralized state management through ChangeNotifier. It allows widgets to reactively rebuild when state changes without passing data through multiple widget levels.

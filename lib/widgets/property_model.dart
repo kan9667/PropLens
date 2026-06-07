@@ -1,0 +1,1 @@
+//opens when user click property
