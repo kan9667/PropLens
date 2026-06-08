@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'data/properties.dart';
 import 'widgets/property_card.dart';
 import 'widgets/property_grid.dart';
+import 'widgets/search_bar.dart';
 
 class Ghar360App extends StatelessWidget {
   const Ghar360App({super.key});
@@ -21,7 +22,15 @@ class Ghar360App extends StatelessWidget {
   appBar: AppBar(
     title: const Text('360 Ghar'),
   ),
-  body: const PropertyGrid(),
+  body: Column(
+  children: [
+    const SearchBarWidget(),
+
+    Expanded( //allows child widget to occupy the remaining available space inside a flex widget such as row or column
+      child: PropertyGrid(),
+    ),
+  ],
+),
 ),
     );
   }
