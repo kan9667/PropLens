@@ -1,9 +1,11 @@
 //users enter query
 
 import 'package:flutter/material.dart';
+import 'package:ghar_360/services/query_parser.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/llm_service.dart';
+import '../services/query_parser.dart';
 
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key});
@@ -47,11 +49,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       ElevatedButton(
         onPressed: () async {
           final result =
-              await LlmService.ask(
+              await QueryParser.parse(
             controller.text,
           );
 
-          debugPrint(result);
+          debugPrint(result.toString());
         },
         child: const Text(
           'Test OpenRouter',

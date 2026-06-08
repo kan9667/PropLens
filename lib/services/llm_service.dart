@@ -6,7 +6,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 class LlmService {
-  static Future<String> ask(String prompt) async {
+  static Future<String> ask(
+  String prompt, {
+  String? systemPrompt,
+}) async {
     final apiKey =
         dotenv.env['OPENROUTER_API_KEY'];
 
@@ -29,11 +32,17 @@ class LlmService {
             'google/gemma-3-27b-it',
 
         'messages': [
-          {
-            'role': 'user',
-            'content': prompt,
-          }
-        ],
+  if (systemPrompt != null)
+    {
+      'role': 'system',
+      'content': systemPrompt,
+    },
+
+  {
+    'role': 'user',
+    'content': prompt,
+  },
+],
       }),
     );
 
