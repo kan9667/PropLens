@@ -68,3 +68,36 @@ class MatchResult {
     required this.reasons,
   });
 }
+
+// Type alias to match exact PropertyModel signature requirement
+typedef PropertyModel = Property;
+
+enum AiState { loading, loaded, error }
+
+class BestMatch {
+  final String title;
+  final String priceDisplay;
+  final double matchScore;
+
+  const BestMatch({
+    required this.title,
+    required this.priceDisplay,
+    required this.matchScore,
+  });
+}
+
+class AiOverview {
+  final BestMatch bestMatch;
+  final List<String> quickInsights;
+  final String fullAnalysis;
+  final String bestMatchReason;
+  final Map<String, String> fullRecommendation;
+
+  const AiOverview({
+    required this.bestMatch,
+    required this.quickInsights,
+    required this.fullAnalysis,
+    required this.bestMatchReason,
+    required this.fullRecommendation,
+  });
+}
