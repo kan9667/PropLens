@@ -51,6 +51,19 @@ class Property {
     this.matchScore,
     this.matchReasons,
   });
+
+  List<String> get imageUrls => [imageUrl];
+  String get priceDisplay => price >= 10000000 
+      ? '₹${(price / 10000000).toStringAsFixed(1)} Cr' 
+      : '₹${(price / 100000).toStringAsFixed(0)}L';
+  String get title => '$bhk BHK Flat in Sector $sector';
+  String get locality => 'Sector $sector';
+  String get city => 'Gurgaon';
+  bool get isAiRecommended => matchScore != null && matchScore! >= 0.8;
+  int get areaSqft => area;
+  int get bathrooms => bhk;
+  List<String> get matchedReasons => matchReasons ?? [];
+  List<String> get missedReasons => const [];
 }
 
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/types.dart';
-import '../screens/property_details_screen.dart';
 import '../providers/app_provider.dart';
 import '../providers/comparison_provider.dart';
 
@@ -38,13 +37,10 @@ class PropertyCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          Navigator.push(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(
-              builder: (_) => PropertyDetailsScreen(
-                property: property,
-              ),
-            ),
+            '/property',
+            arguments: property,
           );
         },
         child: Column(

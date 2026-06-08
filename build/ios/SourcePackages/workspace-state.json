@@ -31,6 +31,20 @@
           "path" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6"
         },
         "subpath" : "shared_preferences_foundation-2.5.6"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "sqflite_darwin-2.4.3",
+          "kind" : "fileSystem",
+          "location" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/sqflite_darwin-2.4.3",
+          "name" : "sqflite_darwin"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/sqflite_darwin-2.4.3"
+        },
+        "subpath" : "sqflite_darwin-2.4.3"
       }
     ],
     "prebuilts" : [

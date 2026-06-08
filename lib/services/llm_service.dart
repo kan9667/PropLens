@@ -211,4 +211,34 @@ Provide the full analysis.
     }
     return parsed;
   }
+
+  static Future<String> analyzeProperty({
+    required Property property,
+    required String question,
+  }) async {
+    final propertyJson = {
+      'id': property.id,
+      'bhk': property.bhk,
+      'price': property.priceDisplay,
+      'location': property.location,
+      'amenities': property.amenities,
+      'nearbySchools': property.nearbySchools,
+      'nearbyHospitals': property.nearbyHospitals,
+      'furnishing': property.furnishing,
+      'parking': property.parking,
+      'ageYears': property.ageYears,
+      'floor': property.floor,
+      'totalFloors': property.totalFloors,
+    };
+
+    final systemPrompt = 'You are Ghar360\'s expert AI Property Advisor. The user is asking a question about a specific property. Answer the question comprehensively but concisely based on the property details provided. Keep your answer under 100 words and be specific to Indian real estate market details.';
+    
+    final prompt = 'Property Details:\n${jsonEncode(propertyJson)}\n\nUser Question: $question\n\nProvide the analysis:';
+    
+    try {
+      return await ask(prompt, systemPrompt: systemPrompt);
+    } catch (e) {
+      return 'Sorry, I couldn\'t analyze this property at the moment: $e';
+    }
+  }
 }
