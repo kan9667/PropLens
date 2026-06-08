@@ -1,10 +1,13 @@
-//cards
+// Property Card
+// Displays a single property in a visually attractive card.
 
 import 'package:flutter/material.dart';
 import '../data/types.dart';
+import '../screens/property_details_screen.dart';
 
 class PropertyCard extends StatelessWidget {
-  final Property property; //dependency injection- parents provide data instead of card fetching data itself
+  // Property data passed from parent widget
+  final Property property;
 
   const PropertyCard({
     super.key,
@@ -13,31 +16,73 @@ class PropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(         // material widget used to group related info inside a visually distinct container
+    return InkWell(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            PropertyDetailsScreen(
+          property: property,
+        ),
+      ),
+    );
+  },
+
+  child: Card(
+      // Shadow depth
       elevation: 3,
+
+      // Space outside card
       margin: const EdgeInsets.all(8),
-      child: Padding(     // adds spacing inside widgets
+
+      child: Padding(
+        // Space inside card
         padding: const EdgeInsets.all(12),
-        child: Column(    //places children vertically
-          crossAxisAlignment: CrossAxisAlignment.start, //aligns content to left
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
-            Container( //general purpose box widget 
+            //--------------------------------------------------
+            // PROPERTY IMAGE PLACEHOLDER
+            //--------------------------------------------------
+            Container(
               height: 120,
               width: double.infinity,
+
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.home,
-                size: 50,
+
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  property.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey.shade300,
+                      child: const Icon(
+                        Icons.home,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
-            const SizedBox(height: 12), //creates spacing
+            const SizedBox(height: 12),
 
+            //--------------------------------------------------
+            // BHK + AREA
+            //--------------------------------------------------
             Text(
               '${property.bhk} BHK • ${property.area} sq ft',
+
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -46,20 +91,110 @@ class PropertyCard extends StatelessWidget {
 
             const SizedBox(height: 6),
 
-            Text(property.location),
+            //--------------------------------------------------
+            // LOCATION
+            //--------------------------------------------------
+            Text(
+              property.location,
+            ),
 
             const SizedBox(height: 6),
 
+            //--------------------------------------------------
+            // PRICE
+            //--------------------------------------------------
             Text(
               '₹${property.price}',
+
               style: const TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
               ),
             ),
+
+            const SizedBox(height: 6),
+
+            //--------------------------------------------------
+            // MATCH SCORE
+            //--------------------------------------------------
+            if (property.matchScore != null)
+              Text(
+                'Match: ${(property.matchScore! * 100).toStringAsFixed(0)}%',
+
+                style: const TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+            const SizedBox(height: 6),
+
+            //--------------------------------------------------
+            // FURNISHING STATUS
+            //--------------------------------------------------
+            Text(
+              property.furnishing,
+
+              style: const TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            //--------------------------------------------------
+            // AMENITIES
+            //--------------------------------------------------
+            Wrap(
+              spacing: 4,
+
+              children: property.amenities
+                  .take(3) // Show only first 3 amenities
+                  .map(
+                    (amenity) => Chip(
+                      label: Text(
+                        amenity,
+
+                        style: const TextStyle(
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+
+            //--------------------------------------------------
+            // MATCH REASONS (future AI explanations)
+            //--------------------------------------------------
+            if (property.matchReasons != null &&
+                property.matchReasons!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+
+                  children: property.matchReasons!
+                      .map(
+                        (reason) => Text(
+                          '✓ $reason',
+
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
           ],
         ),
       ),
+    ),
     );
+    
   }
 }

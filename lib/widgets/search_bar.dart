@@ -1,11 +1,10 @@
 //users enter query
 
 import 'package:flutter/material.dart';
-import 'package:ghar_360/services/query_parser.dart';
+
+
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
-import '../services/llm_service.dart';
-import '../services/query_parser.dart';
 
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key});
@@ -46,19 +45,18 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
       const SizedBox(height: 12),
 
-      ElevatedButton(
-        onPressed: () async {
-          final result =
-              await QueryParser.parse(
+     ElevatedButton(
+      onPressed: () async {
+        await context
+          .read<AppProvider>()
+          .updateQuery(
             controller.text,
-          );
-
-          debugPrint(result.toString());
-        },
-        child: const Text(
-          'Test OpenRouter',
-        ),
-      ),
+        );
+  },
+  child: const Text(
+    'Search',
+  ),
+)
     ],
   ),
 );

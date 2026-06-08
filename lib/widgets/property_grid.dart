@@ -1,7 +1,6 @@
 //shows search results
 
 import 'package:flutter/material.dart';
-import '../data/properties.dart';
 import 'property_card.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';

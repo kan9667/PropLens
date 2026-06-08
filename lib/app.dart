@@ -2,8 +2,7 @@
 
 
 import 'package:flutter/material.dart';
-import 'data/properties.dart';
-import 'widgets/property_card.dart';
+
 import 'widgets/property_grid.dart';
 import 'widgets/search_bar.dart';
 

@@ -12,6 +12,7 @@ final List<Property> mockProperties = [ //mock properties exists in RAM, when ap
 //property 1
   Property(
   id: '1',
+  imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&auto=format&fit=crop&q=80',
   bhk: 2,
   area: 1200,
   location: 'Sector 50, Gurgaon',
@@ -40,6 +41,8 @@ final List<Property> mockProperties = [ //mock properties exists in RAM, when ap
 //property 2
 Property(
   id: '2',
+  imageUrl: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80',
+  
   bhk: 3,
   area: 1650,
   location: 'Sector 65, Gurgaon',
@@ -66,6 +69,7 @@ Property(
 //property 3
 Property(
   id: '3',
+  imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
   bhk: 1,
   area: 650,
   location: 'Sector 52, Gurgaon',
@@ -91,6 +95,7 @@ Property(
 //property 4
 Property(
   id: '4',
+  imageUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&auto=format&fit=crop&q=80',
   bhk: 2,
   area: 1100,
   location: 'Sector 57, Gurgaon',
@@ -109,6 +114,7 @@ Property(
 //property 5
 Property(
   id: '5',
+  imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80',
   bhk: 2,
   area: 1300,
   location: 'Sector 83, Gurgaon',
@@ -127,6 +133,7 @@ Property(
 //property 6
 Property(
   id: '6',
+  imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80',
   bhk: 3,
   area: 1800,
   location: 'Sector 53, Gurgaon',
@@ -145,6 +152,7 @@ Property(
 //property 7
 Property(
   id: '7',
+  imageUrl: 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&auto=format&fit=crop&q=80',
   bhk: 1,
   area: 700,
   location: 'Sector 65, Gurgaon',
@@ -163,6 +171,7 @@ Property(
 //property 8
 Property(
   id: '8',
+  imageUrl: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop&q=80',
   bhk: 2,
   area: 1250,
   location: 'Sector 50, Gurgaon',
@@ -181,6 +190,7 @@ Property(
 //property 9
 Property(
   id: '9',
+  imageUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=80',
   bhk: 3,
   area: 1700,
   location: 'Sector 52, Gurgaon',
@@ -199,6 +209,7 @@ Property(
 //property 10
 Property(
   id: '10',
+  imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80',
   bhk: 2,
   area: 1150,
   location: 'Sector 57, Gurgaon',
@@ -217,6 +228,7 @@ Property(
 //property 11
 Property(
   id: '11',
+  imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
   bhk: 1,
   area: 600,
   location: 'Sector 83, Gurgaon',
@@ -235,6 +247,7 @@ Property(
 //property 12
 Property(
   id: '12',
+  imageUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&auto=format&fit=crop&q=80',
   bhk: 2,
   area: 1350,
   location: 'Sector 53, Gurgaon',

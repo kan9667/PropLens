@@ -8,6 +8,7 @@
 
 class Property {
   final String id;
+  final String imageUrl;
   final int bhk;
   final int area;
   final String location;
@@ -33,6 +34,7 @@ class Property {
 
   Property({
     required this.id,
+    required this.imageUrl,
     required this.bhk,
     required this.area,
     required this.location,
@@ -51,30 +53,7 @@ class Property {
   });
 }
 
-class ParsedQuery {
-  final int? bhk;
 
-  final List<String> locations;
-
-  final List<int> sectors;
-
-  final int? priceMin;
-  final int? priceMax;
-
-  final List<String> amenities;
-
-  final List<String> preferences;
-
-  ParsedQuery({
-    this.bhk,
-    required this.locations,
-    required this.sectors,
-    this.priceMin,
-    this.priceMax,
-    required this.amenities,
-    required this.preferences,
-  });
-}
 
 class MatchResult {
   final Property property;
