@@ -33,7 +33,7 @@ class PropertyCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+      margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
@@ -46,9 +46,6 @@ class PropertyCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //--------------------------------------------------
-            // PROPERTY IMAGE + ACTIONS OVERLAY
-            //--------------------------------------------------
             Stack(
               children: [
                 AspectRatio(
@@ -81,7 +78,6 @@ class PropertyCard extends StatelessWidget {
                     },
                   ),
                 ),
-                // Favorites Icon Button Overlay
                 Positioned(
                   top: 8,
                   right: 8,
@@ -102,7 +98,6 @@ class PropertyCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Compare Checkbox Overlay
                 Positioned(
                   top: 8,
                   left: 8,
@@ -145,53 +140,51 @@ class PropertyCard extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  //--------------------------------------------------
-                  // BHK + AREA
-                  //--------------------------------------------------
                   Text(
                     '${property.bhk} BHK • ${property.area} sq ft',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-
-                  //--------------------------------------------------
-                  // LOCATION
-                  //--------------------------------------------------
-                  Text(
-                    property.location,
-                    style: TextStyle(
-                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                      fontSize: 12,
+                      fontSize: 13,
+                      height: 1.15,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
-
-                  //--------------------------------------------------
-                  // PRICE & MATCH BADGE Row
-                  //--------------------------------------------------
+                  const SizedBox(height: 3),
+                  Text(
+                    property.location,
+                    style: TextStyle(
+                      color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                      fontSize: 11,
+                      height: 1.15,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        '₹${(property.price / 100000).toStringAsFixed(0)}L',
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
+                      Expanded(
+                        child: Text(
+                          '₹${(property.price / 100000).toStringAsFixed(0)}L',
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 15,
+                            height: 1.1,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (property.matchScore != null)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                           decoration: BoxDecoration(
                             color: _getMatchScoreColor(property.matchScore!).withAlpha(25),
                             borderRadius: BorderRadius.circular(8),
@@ -201,21 +194,18 @@ class PropertyCard extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            '${(property.matchScore! * 100).toStringAsFixed(0)}% Match',
+                            '${(property.matchScore! * 100).toStringAsFixed(0)}%',
                             style: TextStyle(
                               color: _getMatchScoreColor(property.matchScore!),
                               fontWeight: FontWeight.bold,
-                              fontSize: 10,
+                              fontSize: 9,
+                              height: 1.0,
                             ),
                           ),
                         ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-
-                  //--------------------------------------------------
-                  // AMENITIES
-                  //--------------------------------------------------
+                  const SizedBox(height: 6),
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
@@ -223,7 +213,7 @@ class PropertyCard extends StatelessWidget {
                         .take(3)
                         .map(
                           (amenity) => Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                             decoration: BoxDecoration(
                               color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(6),
@@ -231,9 +221,12 @@ class PropertyCard extends StatelessWidget {
                             child: Text(
                               amenity,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 9,
+                                height: 1.0,
                                 color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         )

@@ -108,11 +108,11 @@ class _PropertyAdvisorWidgetState extends State<PropertyAdvisorWidget> {
               ),
               const SizedBox(width: 12),
               const Text(
-                '🤖 AI Property Advisor',
+                'AI Property Advisor',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.3,
                 ),
               ),
             ],
@@ -273,8 +273,8 @@ class _PropertyAdvisorWidgetState extends State<PropertyAdvisorWidget> {
                       provider.aiAnswer,
                       style: const TextStyle(
                         fontSize: 14,
-                        height: 1.5,
-                        letterSpacing: 0.2,
+                        height: 1.55,
+                        letterSpacing: 0.1,
                       ),
                     ),
             ),

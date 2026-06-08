@@ -4,11 +4,27 @@ import '../data/types.dart';
 import '../providers/app_provider.dart';
 import '../utils/theme.dart';
 
+class _OverviewSection {
+  final String icon;
+  final String title;
+  final String body;
+  final bool isRating;
+  final String? ratingLine;
+
+  const _OverviewSection({
+    required this.icon,
+    required this.title,
+    required this.body,
+    this.isRating = false,
+    this.ratingLine,
+  });
+}
+
 class AiOverviewWidget extends StatefulWidget {
   final List<PropertyModel> results;
   final String userQuery;
-  final AiOverview? overview; // null = still loading
-  final AiState state; // loading | loaded | error
+  final AiOverview? overview;
+  final AiState state;
   final VoidCallback onExpand;
   final bool isExpanded;
 
@@ -46,6 +62,8 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
     super.dispose();
   }
 
+  bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
+
   Widget _buildShimmerBar(double widthPct, double height) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final baseColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
@@ -66,7 +84,7 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
                 colors: [baseColor, highlightColor, baseColor],
                 stops: [
                   0.0,
-                  (_shimmerAnim.value.clamp(0.0, 1.0)),
+                  _shimmerAnim.value.clamp(0.0, 1.0),
                   1.0,
                 ],
               ),
@@ -74,28 +92,6 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
           ),
         );
       },
-    );
-  }
-
-  Widget _buildShimmerLoadingState() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        const Divider(height: 1, color: AppColors.divider, thickness: 0.5),
-        const SizedBox(height: 16),
-        _buildShimmerBar(0.8, 12),
-        const SizedBox(height: 12),
-        _buildShimmerBar(0.6, 12),
-        const SizedBox(height: 12),
-        _buildShimmerBar(0.9, 12),
-        const SizedBox(height: 12),
-        _buildShimmerBar(0.5, 12),
-        const SizedBox(height: 12),
-        _buildShimmerBar(0.7, 12),
-        const SizedBox(height: 12),
-        _buildShimmerBar(0.4, 12),
-      ],
     );
   }
 
@@ -109,14 +105,14 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
     if (items.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(left: 8.0),
-        child: Text(text, style: AppTextStyles.bodyMedium),
+        child: Text(text.trim(), style: AppTextStyles.bodyMedium),
       );
     }
 
     return Column(
       children: items.map((item) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 3),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -125,18 +121,10 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
                 child: Container(
                   width: 6,
                   height: 6,
-                  decoration: BoxDecoration(
-                    color: dotColor,
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
                 ),
               ),
-              Expanded(
-                child: Text(
-                  item,
-                  style: AppTextStyles.bodyMedium,
-                ),
-              ),
+              Expanded(child: Text(item, style: AppTextStyles.bodyMedium)),
             ],
           ),
         );
@@ -144,15 +132,12 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
     );
   }
 
-  Widget _buildSectionHeader(String emoji, String title) {
+  Widget _buildSectionHeader(String icon, String title) {
     return Row(
       children: [
-        Text(emoji, style: const TextStyle(fontSize: 16)),
+        Text(icon, style: const TextStyle(fontSize: 16)),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: AppTextStyles.titleSmall.copyWith(color: AppColors.primary),
-        ),
+        Text(title, style: AppTextStyles.titleSmall.copyWith(color: AppColors.primary)),
       ],
     );
   }
@@ -182,13 +167,88 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
       ),
       child: Text(
         rating.toUpperCase(),
-        style: TextStyle(
-          color: chipColor,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(color: chipColor, fontSize: 10, fontWeight: FontWeight.bold),
       ),
     );
+  }
+
+  List<_OverviewSection> _buildSections(AiOverview overview) {
+    final rec = overview.fullRecommendation;
+    final sections = <_OverviewSection>[];
+
+    final bestReason = rec['BEST_MATCH'] ?? overview.bestMatchReason;
+    if (_hasText(bestReason)) {
+      sections.add(_OverviewSection(
+        icon: '🏆',
+        title: 'Best Match',
+        body: '${overview.bestMatch.title} • ${overview.bestMatch.priceDisplay}\n$bestReason',
+      ));
+    }
+
+    if (widget.results.length >= 2 && _hasText(rec['RUNNER_UP'])) {
+      final runner = widget.results[1];
+      sections.add(_OverviewSection(
+        icon: '🥈',
+        title: 'Runner-Up',
+        body:
+            '${runner.bhk} BHK in ${runner.location.split(',').first.trim()} • ₹${(runner.price / 100000).toStringAsFixed(0)}L\n${rec['RUNNER_UP']}',
+      ));
+    }
+
+    if (_hasText(rec['PROS'])) {
+      sections.add(_OverviewSection(icon: '✅', title: 'Pros', body: rec['PROS']!));
+    }
+    if (_hasText(rec['CONS'])) {
+      sections.add(_OverviewSection(icon: '❌', title: 'Cons', body: rec['CONS']!));
+    }
+    if (_hasText(rec['INVESTMENT'])) {
+      sections.add(_OverviewSection(
+        icon: '📈',
+        title: 'Investment Score',
+        body: rec['INVESTMENT']!.contains('\n')
+            ? rec['INVESTMENT']!.substring(rec['INVESTMENT']!.indexOf('\n') + 1)
+            : rec['INVESTMENT']!,
+        isRating: true,
+        ratingLine: rec['INVESTMENT']!.split('\n').first,
+      ));
+    }
+    if (_hasText(rec['RENTAL_YIELD'])) {
+      sections.add(_OverviewSection(icon: '💰', title: 'Rental Yield', body: rec['RENTAL_YIELD']!));
+    }
+    if (_hasText(rec['FAMILY'])) {
+      sections.add(_OverviewSection(icon: '👨‍👩‍👧', title: 'Family Suitability', body: rec['FAMILY']!));
+    }
+    if (_hasText(rec['APPRECIATION'])) {
+      sections.add(_OverviewSection(icon: '📅', title: 'Future Appreciation', body: rec['APPRECIATION']!));
+    }
+
+    final schools = rec['SCHOOLS'] ??
+        (widget.results.isNotEmpty && widget.results.first.nearbySchools.isNotEmpty
+            ? widget.results.first.nearbySchools.join(', ')
+            : null);
+    if (_hasText(schools)) {
+      sections.add(_OverviewSection(icon: '🏫', title: 'Nearby Schools', body: schools!));
+    }
+
+    final hospitals = rec['HOSPITALS'] ??
+        (widget.results.isNotEmpty && widget.results.first.nearbyHospitals.isNotEmpty
+            ? widget.results.first.nearbyHospitals.join(', ')
+            : null);
+    if (_hasText(hospitals)) {
+      sections.add(_OverviewSection(icon: '🏥', title: 'Nearby Hospitals', body: hospitals!));
+    }
+
+    return sections;
+  }
+
+  Widget _buildSectionBody(_OverviewSection section) {
+    if (section.title == 'Pros' || section.title == 'Cons') {
+      return _buildBulletList(
+        section.body,
+        section.title == 'Pros' ? AppColors.success : AppColors.error,
+      );
+    }
+    return Text(section.body, style: AppTextStyles.bodyMedium);
   }
 
   @override
@@ -205,53 +265,33 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
           color: isDark ? Colors.grey.shade900 : Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: AppTheme.cardDecoration.boxShadow,
-          border: const Border(
-            left: BorderSide(
-              color: AppColors.primary,
-              width: 4,
-            ),
-          ),
+          border: const Border(left: BorderSide(color: AppColors.primary, width: 4)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //---------------------------------------------
-              // Row 1: Title & Status Indicator
-              //---------------------------------------------
               Row(
                 children: [
-                  const Text(
-                    '🤖 AI Overview',
-                    style: AppTextStyles.titleMedium,
-                  ),
+                  const Text('🤖 AI Overview', style: AppTextStyles.titleMedium),
                   const Spacer(),
                   if (widget.state == AiState.loading)
                     const SizedBox(
                       width: 16,
                       height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.primary,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
                     ),
                   if (widget.state == AiState.loaded)
                     Container(
                       width: 8,
                       height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.success,
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: const BoxDecoration(color: AppColors.success, shape: BoxShape.circle),
                     ),
                 ],
               ),
               const SizedBox(height: 12),
 
-              //---------------------------------------------
-              // Row 2 / Body based on state
-              //---------------------------------------------
               if (widget.state == AiState.loading) ...[
                 _buildShimmerBar(0.7, 14),
                 const SizedBox(height: 8),
@@ -262,32 +302,31 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
                     const Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 20),
                     const SizedBox(width: 8),
                     const Expanded(
-                      child: Text(
-                        'AI analysis unavailable',
-                        style: AppTextStyles.bodyMedium,
-                      ),
+                      child: Text('AI analysis unavailable', style: AppTextStyles.bodyMedium),
                     ),
                     TextButton(
-                      onPressed: () {
-                        context.read<AppProvider>().generateAiOverview();
-                      },
-                      child: const Text(
-                        'Retry',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      onPressed: () => context.read<AppProvider>().generateAiOverview(),
+                      child: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
               ] else if (widget.state == AiState.loaded && overview != null) ...[
                 Text(
-                  '✓ Found ${widget.results.length} matching properties',
+                  'Found ${widget.results.length} matching properties',
                   style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
 
-                //---------------------------------------------
-                // Row 3: Best Match Mini Card
-                //---------------------------------------------
+                if (_hasText(overview.fullAnalysis)) ...[
+                  Text(
+                    overview.fullAnalysis,
+                    style: AppTextStyles.bodyMedium.copyWith(height: 1.5),
+                    maxLines: widget.isExpanded ? null : 2,
+                    overflow: widget.isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -300,10 +339,7 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Best Match',
-                              style: AppTextStyles.labelSmall,
-                            ),
+                            const Text('Best Match', style: AppTextStyles.labelSmall),
                             const SizedBox(height: 4),
                             Text(
                               overview.bestMatch.title,
@@ -314,10 +350,7 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              overview.bestMatch.priceDisplay,
-                              style: AppTextStyles.titleMediumBold,
-                            ),
+                            Text(overview.bestMatch.priceDisplay, style: AppTextStyles.titleMediumBold),
                           ],
                         ),
                       ),
@@ -326,181 +359,70 @@ class _AiOverviewWidgetState extends State<AiOverviewWidget> with SingleTickerPr
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
 
-                //---------------------------------------------
-                // Row 4: Quick Insight Chips
-                //---------------------------------------------
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: overview.quickInsights.take(3).map((reason) {
-                      return Container(
-                        margin: const EdgeInsets.only(right: 6),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.successLight.withAlpha(isDark ? 30 : 255),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          '✓ $reason',
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.success,
-                            fontWeight: FontWeight.w600,
+                if (overview.quickInsights.isNotEmpty)
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: overview.quickInsights.take(3).map((reason) {
+                        return Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.successLight.withAlpha(isDark ? 30 : 255),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ),
-                      );
-                    }).toList(),
+                          child: Text(
+                            '✓ $reason',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                   ),
-                ),
 
-                //---------------------------------------------
-                // EXPANDED STATE CONTENT
-                //---------------------------------------------
                 if (widget.isExpanded) ...[
-                  if (overview.fullRecommendation.isEmpty)
-                    _buildShimmerLoadingState()
-                  else ...[
-                    const SizedBox(height: 8),
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
+                  Builder(
+                    builder: (context) {
+                      final sections = _buildSections(overview);
+                      if (sections.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: _buildShimmerBar(0.8, 12),
+                        );
+                      }
 
-                    // 1. Best Match
-                    _buildSectionHeader('🏆', 'Best Match'),
-                    const SizedBox(height: 6),
-                    Text(
-                      '${overview.bestMatch.title} • ${overview.bestMatch.priceDisplay} • ${widget.results.isNotEmpty ? widget.results.first.location : "Gurgaon"}',
-                      style: AppTextStyles.titleSmall.copyWith(fontSize: 13),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      overview.bestMatchReason,
-                      style: AppTextStyles.bodyMedium,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 2. Runner-Up
-                    _buildSectionHeader('🥈', 'Runner-Up'),
-                    const SizedBox(height: 6),
-                    if (widget.results.length >= 2) ...[
-                      Text(
-                        '${widget.results[1].bhk} BHK in ${widget.results[1].location.split(',')[0]} • ₹${(widget.results[1].price / 100000).toStringAsFixed(0)}L',
-                        style: AppTextStyles.titleSmall.copyWith(fontSize: 13),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        overview.fullRecommendation['RUNNER_UP']?.isNotEmpty == true
-                            ? overview.fullRecommendation['RUNNER_UP']!
-                            : 'Highly rated second choice matching your preferences.',
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                    ] else
-                      const Text(
-                        'No runner-up available matching the filter conditions.',
-                        style: AppTextStyles.bodyMedium,
-                      ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 3. Pros
-                    _buildSectionHeader('✅', 'Pros'),
-                    const SizedBox(height: 6),
-                    _buildBulletList(
-                      overview.fullRecommendation['PROS'] ?? 'Matches primary parameters',
-                      AppColors.success,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 4. Cons
-                    _buildSectionHeader('❌', 'Cons'),
-                    const SizedBox(height: 6),
-                    _buildBulletList(
-                      overview.fullRecommendation['CONS'] ?? 'No major negative factors identified',
-                      AppColors.error,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 5. Investment Score
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildSectionHeader('📈', 'Investment Score'),
-                        _buildRatingChip(
-                          overview.fullRecommendation['INVESTMENT']?.split('\n').first ?? 'Medium',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      overview.fullRecommendation['INVESTMENT']?.contains('\n') == true
-                          ? overview.fullRecommendation['INVESTMENT']!.substring(
-                              overview.fullRecommendation['INVESTMENT']!.indexOf('\n') + 1)
-                          : overview.fullRecommendation['INVESTMENT'] ?? 'Good asset values and high growth potential.',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 6. Rental Yield
-                    _buildSectionHeader('💰', 'Rental Yield'),
-                    const SizedBox(height: 6),
-                    Text(
-                      overview.fullRecommendation['RENTAL_YIELD'] ?? 'Estimated 3% - 4.5% annual yield based on historical sector stats.',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 7. Family Suitability
-                    _buildSectionHeader('👨‍👩‍👧', 'Family Suitability'),
-                    const SizedBox(height: 6),
-                    Text(
-                      overview.fullRecommendation['FAMILY'] ?? 'Great safety records, multiple nearby schools and parks.',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 8. Future Appreciation
-                    _buildSectionHeader('📅', 'Future Appreciation'),
-                    const SizedBox(height: 6),
-                    Text(
-                      overview.fullRecommendation['APPRECIATION'] ?? 'High infrastructure growth expectations in the region.',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 9. Nearby Schools
-                    _buildSectionHeader('🏫', 'Nearby Schools'),
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.results.isNotEmpty
-                          ? widget.results.first.nearbySchools.join(', ')
-                          : 'No school lists parsed.',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-
-                    const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
-
-                    // 10. Nearby Hospitals
-                    _buildSectionHeader('🏥', 'Nearby Hospitals'),
-                    const SizedBox(height: 6),
-                    Text(
-                      widget.results.isNotEmpty
-                          ? widget.results.first.nearbyHospitals.join(', ')
-                          : 'No hospital lists parsed.',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                  ],
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 12),
+                          const Divider(height: 1, color: AppColors.divider, thickness: 0.5),
+                          for (int i = 0; i < sections.length; i++) ...[
+                            if (i > 0) const Divider(height: 24, color: AppColors.divider, thickness: 0.5),
+                            if (sections[i].isRating && _hasText(sections[i].ratingLine))
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildSectionHeader(sections[i].icon, sections[i].title),
+                                  _buildRatingChip(sections[i].ratingLine!),
+                                ],
+                              )
+                            else
+                              _buildSectionHeader(sections[i].icon, sections[i].title),
+                            const SizedBox(height: 6),
+                            _buildSectionBody(sections[i]),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
                 ],
 
-                //---------------------------------------------
-                // Footer: Expand / Collapse analysis
-                //---------------------------------------------
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
@@ -539,18 +461,11 @@ class MatchScoreBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withAlpha(25),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color,
-          width: 1,
-        ),
+        border: Border.all(color: color, width: 1),
       ),
       child: Text(
         '${(score * 100).toStringAsFixed(0)}% Match',
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
-        ),
+        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 10),
       ),
     );
   }

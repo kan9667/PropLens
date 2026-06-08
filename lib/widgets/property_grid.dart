@@ -4,30 +4,58 @@ import 'property_card.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 
+class _GridLayout {
+  final int crossAxisCount;
+  final double mainAxisExtent;
+
+  const _GridLayout({
+    required this.crossAxisCount,
+    required this.mainAxisExtent,
+  });
+}
+
 class PropertyGrid extends StatelessWidget {
   const PropertyGrid({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<AppProvider>(); //listen for changes
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final width = MediaQuery.of(context).size.width;
+  _GridLayout _layoutForWidth(double width, double textScale) {
+    final scale = textScale.clamp(1.0, 1.35);
 
-    // Calculate responsive column count and aspect ratio to prevent overflows
     int crossAxisCount = 2;
-    double childAspectRatio = 0.65; // Mobile default (taller to avoid overflow)
-
     if (width > 1200) {
       crossAxisCount = 4;
-      childAspectRatio = 0.8;
     } else if (width > 800) {
       crossAxisCount = 3;
-      childAspectRatio = 0.72;
     } else if (width < 360) {
-      // Extremely small devices
       crossAxisCount = 1;
-      childAspectRatio = 1.2;
     }
+
+    const gridPadding = 24.0;
+    const crossAxisSpacing = 10.0;
+    final itemWidth =
+        (width - gridPadding - crossAxisSpacing * (crossAxisCount - 1)) / crossAxisCount;
+    final imageHeight = itemWidth / 1.5;
+    final metaHeight = 96.0 * scale + (scale > 1.05 ? 12.0 : 0.0);
+
+    return _GridLayout(
+      crossAxisCount: crossAxisCount,
+      mainAxisExtent: imageHeight + metaHeight + 16,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<AppProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final width = MediaQuery.sizeOf(context).width;
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
+    final layout = _layoutForWidth(width, textScale);
+
+    final gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: layout.crossAxisCount,
+      mainAxisExtent: layout.mainAxisExtent,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+    );
 
     if (provider.isLoading) {
       return Shimmer.fromColors(
@@ -37,39 +65,28 @@ class PropertyGrid extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: 4, // Show 4 skeleton cards
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            childAspectRatio: childAspectRatio,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-          ),
+          itemCount: 4,
+          gridDelegate: gridDelegate,
           itemBuilder: (context, index) {
             return Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const SizedBox(
-                height: 200,
-              ),
+              margin: EdgeInsets.zero,
+              child: const SizedBox.expand(),
             );
           },
         ),
       );
     }
 
-    return GridView.builder( //creates item only when needed - lazy loading
+    return GridView.builder(
       padding: const EdgeInsets.all(12),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: provider.results.length, 
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount( //controls layout
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: childAspectRatio, //controls card space
-        crossAxisSpacing: 10, //horizontal spacing
-        mainAxisSpacing: 10, //vertical spacing
-      ),
-      itemBuilder: (context, index) { 
+      itemCount: provider.results.length,
+      gridDelegate: gridDelegate,
+      itemBuilder: (context, index) {
         return PropertyCard(
           property: provider.results[index],
         );

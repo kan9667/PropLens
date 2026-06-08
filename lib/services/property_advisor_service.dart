@@ -46,46 +46,46 @@ $propertiesJson
 Recommend the best properties based on the user's question, explaining your reasoning clearly. Reference specific properties by their ID, BHK, price in Lakhs, and location. Highlight strengths and weaknesses, and list drawbacks if any.
 ''';
 
-    // 4. System prompt
     const systemPrompt = '''
-You are an expert Indian real estate advisor.
-Analyze properties like a professional consultant.
-
-Evaluate:
-- Family suitability
-- Schools
-- Hospitals
-- Amenities
-- Value for money
-- Future appreciation
-- Investment potential
-- Accessibility
-- Furnishing quality
+You are an expert Indian real estate advisor. Answer in plain English only.
 
 Rules:
-1. Always explain reasoning.
-2. Recommend the best matching properties based on the user's question.
-3. For each recommendation, provide clear strengths (reasons) and potential drawbacks.
-4. Keep answers concise, practical, and formatted nicely.
-
-Use the following formatting structure for your output:
-
-🏆 Best Overall / Best Value / Best for Family (Pick the appropriate title)
-Property <ID>
-Reasons:
-✓ <Reason 1>
-✓ <Reason 2>
-
-Potential drawback:
-• <Drawback>
-
-(Repeat for other recommended properties as necessary)
+1. Keep the full answer under 100 words.
+2. No markdown, asterisks, hashtags, bullet symbols, or emojis.
+3. Use short sentences and line breaks between ideas.
+4. Name properties by BHK, price in Lakhs, and location (not raw IDs).
+5. State one best pick, one alternative if relevant, and one honest drawback.
+6. Be direct and practical for a home buyer in India.
 ''';
 
     try {
-      return await LlmService.ask(prompt, systemPrompt: systemPrompt);
+      final raw = await LlmService.ask(prompt, systemPrompt: systemPrompt);
+      return formatAdvisorAnswer(raw);
     } catch (e) {
-      return 'Advisor Error: Unable to connect to advisor. Please try again later. (Details: $e)';
+      return 'Unable to reach the advisor right now. Please try again in a moment.';
     }
+  }
+
+  /// Strips markdown/symbol noise so answers read cleanly in the UI.
+  static String formatAdvisorAnswer(String raw) {
+    var text = raw.trim();
+
+    text = text.replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'$1');
+    text = text.replaceAll(RegExp(r'\*([^*]+)\*'), r'$1');
+    text = text.replaceAll(RegExp(r'`([^`]+)`'), r'$1');
+    text = text.replaceAll(RegExp(r'^#{1,6}\s*', multiLine: true), '');
+    text = text.replaceAll(RegExp(r'^\s*[-*•✓▪►]\s*', multiLine: true), '');
+    text = text.replaceAll(RegExp(r'^\s*\d+[.)]\s*', multiLine: true), '');
+    text = text.replaceAll(RegExp(r'[🏆🥈✅❌💰📈👨‍👩‍👧📅🏫🏥🤖]'), '');
+    text = text.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+    text = text.replaceAll(RegExp(r' {2,}'), ' ');
+
+    final lines = text
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
+
+    return lines.join('\n\n');
   }
 }

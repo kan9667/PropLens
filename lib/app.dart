@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/property_details_screen.dart';
 import 'data/types.dart';
+import 'core/app_theme.dart';
 
 class Ghar360App extends StatelessWidget {
   const Ghar360App({super.key});
@@ -12,10 +13,7 @@ class Ghar360App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: '360 Ghar', //app name
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      ),
+      theme: AppTheme.lightTheme,
       home: const HomeScreen(),
       routes: {
         '/property': (context) {

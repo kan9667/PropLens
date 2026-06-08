@@ -108,21 +108,44 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
           results: results,
           query: query,
         );
+        final fallback = LlmService.buildFallbackRecommendation(
+          results: results,
+          query: query,
+        );
+        final merged = LlmService.mergeRecommendations(fullRec, fallback);
 
         aiOverview = AiOverview(
           bestMatch: overview.bestMatch,
           quickInsights: overview.quickInsights,
           fullAnalysis: overview.fullAnalysis,
-          bestMatchReason: fullRec['BEST_MATCH']?.isNotEmpty == true
-              ? fullRec['BEST_MATCH']!
-              : overview.bestMatchReason,
-          fullRecommendation: fullRec,
+          bestMatchReason: merged['BEST_MATCH'] ?? overview.bestMatchReason,
+          fullRecommendation: merged,
         );
         notifyListeners();
       }
     } catch (e) {
       debugPrint('Overview generation error: $e');
-      aiOverviewState = AiState.error;
+      final fallback = LlmService.buildFallbackRecommendation(
+        results: results,
+        query: query,
+      );
+      if (fallback.isNotEmpty) {
+        aiOverview = AiOverview(
+          bestMatch: BestMatch(
+            title: '${results.first.bhk} BHK in ${results.first.location.split(',').first}',
+            priceDisplay: results.first.priceDisplay,
+            matchScore: results.first.matchScore ?? 0.85,
+          ),
+          quickInsights: results.first.matchReasons?.take(3).toList() ??
+              ['Matches your search', 'Verified listing', 'Gurugram location'],
+          fullAnalysis: 'Found ${results.length} properties matching "$query".',
+          bestMatchReason: fallback['BEST_MATCH'] ?? '',
+          fullRecommendation: fallback,
+        );
+        aiOverviewState = AiState.loaded;
+      } else {
+        aiOverviewState = AiState.error;
+      }
     } finally {
       notifyListeners();
     }

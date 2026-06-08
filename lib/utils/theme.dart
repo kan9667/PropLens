@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Colors.blue;
-  static const Color primaryLight = Color(0xFFE3F2FD);
-  static const Color success = Colors.green;
-  static const Color successLight = Color(0xFFE8F5E9);
-  static const Color textSecondary = Colors.grey;
-  static const Color textPrimary = Colors.black;
-  static const Color textPrimaryDark = Colors.white;
-  static const Color warning = Colors.amber;
-  static const Color error = Colors.red;
-  static const Color divider = Color(0xFFE2E8F0);
+  static const Color primary = Color(0xFF1A6B4A);      // deep emerald
+  static const Color primaryLight = Color(0xFFEBF5F0);
+  static const Color success = Color(0xFF00C37A);       // electric mint
+  static const Color successLight = Color(0xFFE6FBF3);
+  static const Color textSecondary = Color(0xFF5A6273);
+  static const Color textPrimary = Color(0xFF0D1117);
+  static const Color textPrimaryDark = Color(0xFFFFFFFF);
+  static const Color warning = Color(0xFFF5A623);       // amber
+  static const Color error = Color(0xFFFF3B30);
+  static const Color divider = Color(0xFFE8ECF0);
+  static const Color background = Color(0xFFFFFFFF);
+  static const Color surface = Color(0xFFF7F9FC);
 }
 
 class AppTextStyles {
@@ -51,9 +53,9 @@ class AppTheme {
     borderRadius: BorderRadius.circular(16),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withAlpha(12),
-        blurRadius: 10,
-        offset: const Offset(0, 4),
+        color: const Color(0xFF1A6B4A).withOpacity(0.08),
+        blurRadius: 24,
+        offset: const Offset(0, 8),
       ),
     ],
   );

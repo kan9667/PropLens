@@ -74,22 +74,45 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           ),
           child: Column(
             children: [
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.home_work,
                     color: Colors.white,
                     size: 32,
                   ),
-                  SizedBox(width: 12),
-                  Text(
-                    '360 Ghar',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
+                  const SizedBox(width: 12),
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '360',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '°',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withAlpha(230),
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' Ghar',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withAlpha(220),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
