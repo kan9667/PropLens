@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:provider/provider.dart';
@@ -79,22 +78,10 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
 
   void _scrollToAskAi() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final targetContext = _askAiSectionKey.currentContext;
-      if (targetContext == null || !_scrollController.hasClients) return;
-
-      final renderObject = targetContext.findRenderObject();
-      if (renderObject == null) return;
-
-      final viewport = RenderAbstractViewport.maybeOf(renderObject);
-      if (viewport == null) return;
-
-      // Place the Ask AI card just below the pinned app bar, not at page bottom.
-      const revealAlignment = 0.14;
-      final targetOffset = viewport.getOffsetToReveal(renderObject, revealAlignment).offset;
-      final maxExtent = _scrollController.position.maxScrollExtent;
+      if (!_scrollController.hasClients) return;
 
       _scrollController.animateTo(
-        targetOffset.clamp(0.0, maxExtent),
+        _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 550),
         curve: Curves.easeInOutCubic,
       );
