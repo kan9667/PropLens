@@ -16,10 +16,6 @@ class HeroSearchWidget extends StatefulWidget {
 }
 
 class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProviderStateMixin {
-  // Pulsing Dot Controller
-  late AnimationController _pulsingDotController;
-  late Animation<double> _dotOpacity;
-
   // Search Bar Pop-Out Controller
   late AnimationController _searchAnimController;
   late Animation<double> _searchScale;
@@ -28,10 +24,9 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
 
   // Stagger entry controllers for text/pill
   late AnimationController _entryController;
-  late Animation<double> _badgeFade;
-  late Animation<Offset> _badgeSlide;
   late Animation<double> _titleFade;
   late Animation<Offset> _titleSlide;
+  late Animation<double> _titleScale;
   // Search input focus & controller
   final FocusNode _searchFocusNode = FocusNode();
   final TextEditingController _searchTextController = TextEditingController();
@@ -80,13 +75,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
   void initState() {
     super.initState();
 
-    // 1. Pulsing Dot (1200ms repeat)
-    _pulsingDotController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat(reverse: true);
-    _dotOpacity = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _pulsingDotController, curve: Curves.easeInOut),
-    );
-
-    // 2. Search Pop-out Spring (elasticOut)
+    // 1. Search Pop-out Spring (elasticOut)
     _searchAnimController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
     _searchScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _searchAnimController, curve: Curves.elasticOut),
@@ -98,19 +87,16 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
       CurvedAnimation(parent: _searchAnimController, curve: Curves.elasticOut),
     );
 
-    // 3. Stagger entry animations
+    // 2. Stagger entry animations
     _entryController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
-    _badgeFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _entryController, curve: const Interval(0.0, 0.4, curve: Curves.easeOut)),
-    );
-    _badgeSlide = Tween<Offset>(begin: const Offset(0.0, -0.5), end: Offset.zero).animate(
-      CurvedAnimation(parent: _entryController, curve: const Interval(0.0, 0.4, curve: Curves.easeOutCubic)),
-    );
     _titleFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _entryController, curve: const Interval(0.1, 0.6, curve: Curves.easeOut)),
     );
     _titleSlide = Tween<Offset>(begin: const Offset(0.0, 0.08), end: Offset.zero).animate(
       CurvedAnimation(parent: _entryController, curve: const Interval(0.1, 0.6, curve: Curves.easeOutCubic)),
+    );
+    _titleScale = Tween<double>(begin: 0.75, end: 1.0).animate(
+      CurvedAnimation(parent: _entryController, curve: const Interval(0.1, 0.7, curve: Curves.elasticOut)),
     );
     // Focus handler
     _searchFocusNode.addListener(() {
@@ -138,7 +124,6 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
   @override
   void dispose() {
     _voiceService.stopListening();
-    _pulsingDotController.dispose();
     _searchAnimController.dispose();
     _entryController.dispose();
     _searchFocusNode.dispose();
@@ -257,132 +242,57 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
   //---------------------------------------------
   Widget _buildLeftColumn(double width) {
     final headlineSize = _headlineSize(width);
-    final badgeSize = width < 360 ? 10.0 : 11.0;
     final isCompact = width < 400;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FadeTransition(
-          opacity: _badgeFade,
-          child: SlideTransition(
-            position: _badgeSlide,
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: isCompact ? 10 : 14, vertical: isCompact ? 8 : 10),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.08),
-                    AppColors.accent.withValues(alpha: 0.12),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.accent.withValues(alpha: 0.35),
-                  width: 1,
-                ),
-              ),
-              child: Row(
+        ScaleTransition(
+          scale: _titleScale,
+          child: FadeTransition(
+            opacity: _titleFade,
+            child: SlideTransition(
+              position: _titleSlide,
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGrad,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.verified_rounded, size: 14, color: Colors.white),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "INDIA'S #1 AI-POWERED SEARCH PLATFORM",
-                          style: TextStyle(
-                            fontSize: badgeSize,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Verified homes with instant AI matching',
-                          style: TextStyle(
-                            fontSize: badgeSize - 1,
-                            color: AppColors.textSecond,
-                            height: 1.3,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Find Your Dream',
+                    style: TextStyle(
+                      fontSize: headlineSize,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      height: 1.15,
                     ),
                   ),
-                  FadeTransition(
-                    opacity: _dotOpacity,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      margin: const EdgeInsets.only(top: 4),
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-        SizedBox(height: isCompact ? 14 : 20),
-
-        FadeTransition(
-          opacity: _titleFade,
-          child: SlideTransition(
-            position: _titleSlide,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Find Your Dream',
-                  style: TextStyle(
-                    fontSize: headlineSize,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    height: 1.15,
-                  ),
-                ),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      'Home with ',
-                      style: TextStyle(
-                        fontSize: headlineSize,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        height: 1.15,
-                      ),
-                    ),
-                    ShaderMask(
-                      shaderCallback: (bounds) => AppColors.primaryGrad.createShader(bounds),
-                      child: Text(
-                        'AI-Powered Search',
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        'Home with ',
                         style: TextStyle(
                           fontSize: headlineSize,
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           height: 1.15,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      ShaderMask(
+                        shaderCallback: (bounds) => AppColors.primaryGrad.createShader(bounds),
+                        child: Text(
+                          'AI-Powered Search',
+                          style: TextStyle(
+                            fontSize: headlineSize,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            height: 1.15,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
