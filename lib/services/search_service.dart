@@ -4,9 +4,47 @@ import '../data/types.dart';
 import 'query_parser.dart';
 
 class SearchService {
+  static bool _matchesFilters(Property property, Map<String, String> filters) {
+    for (final entry in filters.entries) {
+      final category = entry.key;
+      final value = entry.value;
+
+      if (category == 'BHK Type') {
+        if (value == '1BHK' && property.bhk != 1) return false;
+        if (value == '2BHK' && property.bhk != 2) return false;
+        if (value == '3BHK' && property.bhk != 3) return false;
+        if (value == '4BHK+' && property.bhk < 4) return false;
+      } else if (category == 'Budget') {
+        if (value == 'Under 50L' && property.price > 5000000) return false;
+        if (value == '50–80L' && (property.price < 5000000 || property.price > 8000000)) return false;
+        if (value == '80L–1Cr' && (property.price < 8000000 || property.price > 10000000)) return false;
+        if (value == 'Above 1Cr' && property.price <= 10000000) return false;
+      } else if (category == 'Locality') {
+        final loc = property.location.toLowerCase();
+        if (value == 'Sector 50' && !loc.contains('sector 50')) return false;
+        if (value == 'Sector 57' && !loc.contains('sector 57')) return false;
+        if (value == 'DLF Phase 1' && !loc.contains('dlf phase 1')) return false;
+        if (value == 'Golf Course Road' && !loc.contains('golf course')) return false;
+        if (value == 'Sohna Road' && !loc.contains('sohna road')) return false;
+      } else if (category == 'Possession') {
+        if (value == 'Ready to Move' && property.ageYears <= 0) return false;
+        if (value == 'Within 1 Year' && property.ageYears > 1) return false;
+        if (value == 'Under Construction' && property.ageYears != 0) return false;
+      } else if (category == 'Amenities') {
+        if (value == 'Near Metro' && !property.amenities.any((a) => a.toLowerCase().contains('metro'))) return false;
+        if (value == 'Near School' && property.nearbySchools.isEmpty) return false;
+        if (value == 'Gated Society' && !property.amenities.any((a) => a.toLowerCase().contains('gated') || a.toLowerCase().contains('security') || a.toLowerCase().contains('park'))) return false;
+        if (value == 'With Parking' && property.parking < 1) return false;
+        if (value == 'East Facing' && !property.amenities.any((a) => a.toLowerCase().contains('sunlight') || a.toLowerCase().contains('east'))) return false;
+      }
+    }
+    return true;
+  }
+
   static List<Property> search({
     required ParsedQuery query,
     required List<Property> properties,
+    Map<String, String>? activeFilters,
   }) {
     final List<Property> results = [];
 
@@ -26,6 +64,12 @@ class SearchService {
     if (query.furnished != null) maxPossibleScore += 15;
 
     for (final property in properties) {
+      if (activeFilters != null && activeFilters.isNotEmpty) {
+        if (!_matchesFilters(property, activeFilters)) {
+          continue;
+        }
+      }
+
       double score = 0;
       List<String> reasons = [];
 

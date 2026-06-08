@@ -47,12 +47,34 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
     return _favoriteIds.contains(propertyId);
   }
 
+  // Active Filters state
+  final Map<String, String> _activeFilters = {};
+  Map<String, String> get activeFilters => _activeFilters;
+
+  void setFilter(String category, String value) {
+    _activeFilters[category] = value;
+    notifyListeners();
+    updateQuery(query);
+  }
+
+  void clearFilter(String category) {
+    _activeFilters.remove(category);
+    notifyListeners();
+    updateQuery(query);
+  }
+
+  void resetFilters() {
+    _activeFilters.clear();
+    notifyListeners();
+    updateQuery(query);
+  }
+
   Future<void> updateQuery(String newQuery) async {
     query = newQuery;
     aiAnswer = ''; // Clear advisor answer when search context changes
     aiOverview = null;
 
-    if (newQuery.trim().isEmpty) {
+    if (newQuery.trim().isEmpty && _activeFilters.isEmpty) {
       // Reset results to show all properties without active match scores
       results = List.from(mockProperties);
       for (final p in results) {
@@ -67,12 +89,15 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
     setLoading(true);
 
     try {
-      final parsedQuery =
-          await QueryParser.parse(newQuery);
+      // Parse natural language query if not empty, otherwise use empty query
+      final parsedQuery = newQuery.trim().isNotEmpty 
+          ? await QueryParser.parse(newQuery)
+          : const ParsedQuery();
 
       results = SearchService.search(
         query: parsedQuery,
         properties: mockProperties,
+        activeFilters: _activeFilters,
       );
 
       // Automatically generate overview card details
@@ -88,7 +113,7 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
   }
 
   Future<void> generateAiOverview() async {
-    if (query.trim().isEmpty) return;
+    if (query.trim().isEmpty && _activeFilters.isEmpty) return;
 
     aiOverviewState = AiState.loading;
     notifyListeners();
@@ -97,6 +122,7 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
       final overview = await LlmService.generateOverview(
         results: results,
         query: query,
+        activeFilters: _activeFilters,
       );
       aiOverview = overview;
       aiOverviewState = AiState.loaded;
@@ -107,10 +133,12 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
         final fullRec = await LlmService.generateFullRecommendation(
           results: results,
           query: query,
+          activeFilters: _activeFilters,
         );
         final fallback = LlmService.buildFallbackRecommendation(
           results: results,
           query: query,
+          activeFilters: _activeFilters,
         );
         final merged = LlmService.mergeRecommendations(fullRec, fallback);
 
@@ -128,6 +156,7 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
       final fallback = LlmService.buildFallbackRecommendation(
         results: results,
         query: query,
+        activeFilters: _activeFilters,
       );
       if (fallback.isNotEmpty) {
         aiOverview = AiOverview(

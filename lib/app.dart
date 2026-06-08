@@ -12,7 +12,7 @@ class Ghar360App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: '360 Ghar', //app name
+      title: 'PropLens', //app name
       theme: AppTheme.lightTheme,
       home: const HomeScreen(),
       routes: {

@@ -28,5 +28,9 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>360°Ghar uses the microphone so you can search for properties with your voice.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>360°Ghar converts your speech into property search queries.</string>
 </dict>
 </plist>

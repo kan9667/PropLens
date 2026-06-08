@@ -607,7 +607,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                   Icon(Icons.auto_awesome, size: 14, color: AppColors.primary),
                   SizedBox(width: 6),
                   Text(
-                    'AI Recommended',
+                    'Recommended',
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 12,

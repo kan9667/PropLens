@@ -64,6 +64,7 @@ class LlmService {
   static Future<AiOverview> generateOverview({
     required List<Property> results,
     required String query,
+    Map<String, String>? activeFilters,
   }) async {
     if (results.isEmpty) {
       return const AiOverview(
@@ -97,7 +98,11 @@ class LlmService {
         'amenities': p.amenities.take(3).toList(),
       }).toList();
 
-      final prompt = 'Provide a brief summary card overview of the best properties that match this search query: "$query". Here are the top properties to choose from: ${jsonEncode(propertiesSummary)}.';
+      final filtersContext = (activeFilters != null && activeFilters.isNotEmpty)
+          ? "Active Filters: ${activeFilters.entries.map((e) => '${e.key}: ${e.value}').join(', ')}"
+          : "";
+
+      final prompt = 'Provide a brief summary card overview of the best properties that match this search query: "$query".${filtersContext.isNotEmpty ? "\n$filtersContext" : ""}\nHere are the top properties to choose from: ${jsonEncode(propertiesSummary)}.';
       analysis = await ask(
         prompt,
         systemPrompt: 'You are an AI Overview assistant. Write a highly concise 2-sentence summary comparing these properties and showing why they match. Do not include markdown.',
@@ -106,7 +111,7 @@ class LlmService {
       analysis = 'Found ${results.length} matching properties. $bestTitle represents the best match at $bestPrice with a match rating of ${(bestScore * 100).toStringAsFixed(0)}%.';
     }
 
-    final fallback = buildFallbackRecommendation(results: results, query: query);
+    final fallback = buildFallbackRecommendation(results: results, query: query, activeFilters: activeFilters);
 
     return AiOverview(
       bestMatch: BestMatch(
@@ -124,6 +129,7 @@ class LlmService {
   static Map<String, String> buildFallbackRecommendation({
     required List<Property> results,
     required String query,
+    Map<String, String>? activeFilters,
   }) {
     if (results.isEmpty) return {};
 
@@ -203,10 +209,11 @@ class LlmService {
   static Future<Map<String, String>> generateFullRecommendation({
     required List<Property> results,
     required String query,
+    Map<String, String>? activeFilters,
   }) async {
     if (results.isEmpty) return {};
 
-    final fallback = buildFallbackRecommendation(results: results, query: query);
+    final fallback = buildFallbackRecommendation(results: results, query: query, activeFilters: activeFilters);
 
     final topThree = results.take(3).map((p) => {
       'id': p.id,
@@ -228,9 +235,13 @@ Be specific, use Indian market context, mention actual numbers.
 Keep each section under 80 words.
 ''';
 
+    final filtersContext = (activeFilters != null && activeFilters.isNotEmpty)
+        ? "Active Filters: ${activeFilters.entries.map((e) => '${e.key}: ${e.value}').join(', ')}"
+        : "";
+
     final userPrompt = '''
 User query: $query
-Properties: ${jsonEncode(topThree)}
+${filtersContext.isNotEmpty ? "$filtersContext\n" : ""}Properties: ${jsonEncode(topThree)}
 Provide the full analysis.
 ''';
 

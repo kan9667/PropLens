@@ -25,6 +25,7 @@ class _PropertyAdvisorWidgetState extends State<PropertyAdvisorWidget> {
 
   @override
   void dispose() {
+    _voiceService.stopListening();
     _controller.dispose();
     super.dispose();
   }
@@ -58,6 +59,10 @@ class _PropertyAdvisorWidgetState extends State<PropertyAdvisorWidget> {
           if (_controller.text.trim().isNotEmpty) {
             _submitQuestion(provider, _controller.text);
           }
+        },
+        onError: (message) {
+          setState(() => _isListening = false);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
         },
       );
     }

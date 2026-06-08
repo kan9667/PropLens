@@ -283,34 +283,36 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   //---------------------------------------------
   // TRUST BAR WIDGET
   //---------------------------------------------
+  static const _trustFeatures = [
+    (
+      icon: Icons.chat_bubble_outline_rounded,
+      title: 'Natural language search',
+      subtitle: 'Describe what you want in plain words',
+      color: AppColors.accent,
+    ),
+    (
+      icon: Icons.psychology_outlined,
+      title: 'AI match reasons',
+      subtitle: 'Know exactly why each property fits',
+      color: AppColors.primary,
+    ),
+    (
+      icon: Icons.location_on_outlined,
+      title: 'Gurgaon focused',
+      subtitle: 'Curated listings across key sectors',
+      color: AppColors.secondary,
+    ),
+    (
+      icon: Icons.summarize_outlined,
+      title: 'AI property summary',
+      subtitle: 'Personalised insight on every listing',
+      color: AppColors.primary,
+    ),
+  ];
+
   Widget _buildTrustBar(double width) {
     final isMobile = width < 700;
-
-    if (isMobile) {
-      return Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border.symmetric(horizontal: BorderSide(color: AppColors.border, width: 1)),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        child: GridView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 2.8,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 10,
-          ),
-          children: [
-            _buildTrustItem(Icons.verified_rounded, "Zero Fake Listings", AppColors.accent),
-            _buildTrustItem(Icons.currency_rupee, "Zero Upfront Fees", AppColors.primary),
-            _buildTrustItem(Icons.support_agent, "Dedicated RM Support", AppColors.secondary),
-            _buildTrustItem(Icons.view_in_ar_rounded, "Studio 360° Tours", AppColors.primary),
-          ],
-        ),
-      );
-    }
+    final horizontalPad = isMobile ? 16.0 : 32.0;
 
     return Container(
       width: double.infinity,
@@ -318,33 +320,43 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         color: AppColors.surface,
         border: Border.symmetric(horizontal: BorderSide(color: AppColors.border, width: 1)),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildTrustItem(Icons.verified_rounded, "Zero Fake Listings", AppColors.accent),
-          _buildTrustItem(Icons.currency_rupee, "Zero Upfront Fees", AppColors.primary),
-          _buildTrustItem(Icons.support_agent, "Dedicated RM Support", AppColors.secondary),
-          _buildTrustItem(Icons.view_in_ar_rounded, "Studio 360° Tours", AppColors.primary),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrustItem(IconData icon, String text, Color color) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecond, height: 1.2),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
+      padding: EdgeInsets.fromLTRB(horizontalPad, 20, horizontalPad, 24),
+      child: isMobile
+          ? GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _trustFeatures.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemBuilder: (context, index) {
+                final f = _trustFeatures[index];
+                return _TrustFeatureCard(
+                  icon: f.icon,
+                  title: f.title,
+                  subtitle: f.subtitle,
+                  color: f.color,
+                );
+              },
+            )
+          : Row(
+              children: [
+                for (int i = 0; i < _trustFeatures.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 14),
+                  Expanded(
+                    child: _TrustFeatureCard(
+                      icon: _trustFeatures[i].icon,
+                      title: _trustFeatures[i].title,
+                      subtitle: _trustFeatures[i].subtitle,
+                      color: _trustFeatures[i].color,
+                    ),
+                  ),
+                ],
+              ],
+            ),
     );
   }
 
@@ -464,6 +476,77 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const Icon(Icons.north_east_rounded, size: 12, color: AppColors.textHint),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _TrustFeatureCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+
+  const _TrustFeatureCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 18, color: color),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+              height: 1.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 3),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 10,
+              color: AppColors.textSecond,
+              height: 1.3,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }

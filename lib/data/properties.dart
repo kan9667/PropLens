@@ -45,7 +45,7 @@ Property(
   
   bhk: 3,
   area: 1650,
-  location: 'Sector 65, Gurgaon',
+  location: 'DLF Phase 1, Gurgaon',
   sector: 65,
   price: 12500000,
   amenities: [
@@ -72,7 +72,7 @@ Property(
   imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
   bhk: 1,
   area: 650,
-  location: 'Sector 52, Gurgaon',
+  location: 'Sohna Road, Gurgaon',
   sector: 52,
   price: 4500000,
   amenities: [
@@ -136,7 +136,7 @@ Property(
   imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80',
   bhk: 3,
   area: 1800,
-  location: 'Sector 53, Gurgaon',
+  location: 'Golf Course Road, Gurgaon',
   sector: 53,
   price: 14000000,
   amenities: ['gym', 'pool', 'sunlight'],

@@ -33,7 +33,7 @@ class AppLogo extends StatelessWidget {
             style: DefaultTextStyle.of(context).style.copyWith(decoration: TextDecoration.none),
             children: [
               TextSpan(
-                text: '360',
+                text: 'Prop',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: fontSize,
@@ -41,20 +41,11 @@ class AppLogo extends StatelessWidget {
                 ),
               ),
               TextSpan(
-                text: '°',
+                text: 'Lens',
                 style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: fontSize * 0.65,
-                  color: AppColors.accent,
-                  height: 1.6,
-                ),
-              ),
-              TextSpan(
-                text: 'Ghar',
-                style: TextStyle(
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w600,
                   fontSize: fontSize,
-                  color: AppColors.textSecond,
+                  color: AppColors.accent,
                 ),
               ),
             ],

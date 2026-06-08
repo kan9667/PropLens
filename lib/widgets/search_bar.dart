@@ -17,6 +17,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
   @override
   void dispose() {
+    _voiceService.stopListening();
     controller.dispose();
     super.dispose();
   }
@@ -41,10 +42,13 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           setState(() {
             _isListening = false;
           });
-          // Automatically search when listening stops and we have some text
           if (controller.text.trim().isNotEmpty) {
             provider.updateQuery(controller.text);
           }
+        },
+        onError: (message) {
+          setState(() => _isListening = false);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
         },
       );
     }
