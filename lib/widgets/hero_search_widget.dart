@@ -437,7 +437,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
         // Stats row
         const Row(
           children: [
-            _StatItem(value: "50K+", label: "Verified Properties"),
+            _StatItem(value: "24/7", label: "AI Advisor"),
             _VerticalDivider(height: 32),
             _StatItem(value: "Instant", label: "AI Match"),
             _VerticalDivider(height: 32),

@@ -5,11 +5,11 @@ This script is timed for a 2-3 minute screen-recorded walkthrough of PropLens. R
 ---
 
 ### **[0:00 - 0:30] Introduction & Rebranding**
-* **Action on screen**: Show the home screen of the app. Move the cursor over the header logo **PropLens** and point out the refreshed trust badges ("Natural language search", "AI match reasons", etc.) and the updated stats row ("Instant AI Match").*
+* **Action on screen**: Show the home screen of the app. Move the cursor over the header logo **PropLens** and point out the refreshed trust badges ("Natural language search", "AI match reasons", etc.) and the updated stats row ("Instant AI Match" and "24/7 AI Advisor").*
 
 > "Hi everyone! Welcome to my demo of **PropLens**, an intelligent AI-powered property search platform for Gurgaon, India. 
 > 
-> As you can see, the app has been rebranded to PropLens with a fresh, modern logo in the header. Right below the search bar, we’ve updated our core feature highlights to reflect our AI focus, such as 'Natural language search' and 'AI match reasons', and our hero statistics now show a live 'Instant AI Match' indicator."
+> As you can see, the app has been rebranded to PropLens with a fresh, modern logo in the header. Right below the search bar, we’ve updated our core feature highlights to reflect our AI focus, such as 'Natural language search' and 'AI match reasons', and our hero statistics now show a live 'Instant AI Match' and '24/7 AI Advisor' indicator."
 
 ---
 
