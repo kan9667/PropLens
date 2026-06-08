@@ -10,6 +10,7 @@
         "cupertino_icons",
         "flutter",
         "flutter_animate",
+        "flutter_dotenv",
         "http",
         "provider",
         "shared_preferences",
@@ -44,6 +45,13 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "flutter_dotenv",
+      "version": "6.0.1",
+      "dependencies": [
+        "flutter"
       ]
     },
     {
