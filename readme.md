@@ -1,5 +1,9 @@
 # PropLens — AI-Powered Property Search
 
+loom video = https://www.loom.com/share/94f152f64357478097f0a6fcb5d6466c
+
+website = https://prop-lens-beige.vercel.app
+
 PropLens is an AI-powered property search prototype for Gurgaon, India, built as part of the 360 Ghar Software Developer Intern assignment. It lets users describe what they are looking for in plain language and returns ranked, filtered property cards with AI-generated match reasons, investment insights, and personalised property summaries — all with no backend.
 
 ---
@@ -267,10 +271,5 @@ lib/
     └── ai_overview_card.dart
 ```
 
----
 
-## Submission
 
-- **GitHub**: this repository
-- **Loom Demo**: [add your link here]
-- **Assignment**: 360 Ghar Software Developer Intern — June 2026
