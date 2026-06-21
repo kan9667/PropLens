@@ -36,25 +36,25 @@ class ParsedQuery {
   }
 
   Map<String, dynamic> toJson() => {
-        'bhk': bhk,
-        'maxBudget': maxBudget,
-        'location': location,
-        'landmark': landmark,
-        'propertyType': propertyType,
-        'facing': facing,
-        'amenities': amenities,
-        'furnished': furnished,
-      };
+    'bhk': bhk,
+    'maxBudget': maxBudget,
+    'location': location,
+    'landmark': landmark,
+    'propertyType': propertyType,
+    'facing': facing,
+    'amenities': amenities,
+    'furnished': furnished,
+  };
 
   bool get isEmpty =>
-    bhk == null &&
-    maxBudget == null &&
-    location == null &&
-    landmark == null &&
-    propertyType == null &&
-    facing == null &&
-    amenities.isEmpty &&
-    furnished == null;
+      bhk == null &&
+      maxBudget == null &&
+      location == null &&
+      landmark == null &&
+      propertyType == null &&
+      facing == null &&
+      amenities.isEmpty &&
+      furnished == null;
 
   @override
   String toString() => 'ParsedQuery(${toJson()})';
@@ -97,7 +97,8 @@ OUTPUT RULES:
 - Never hallucinate values. If a field cannot be confidently extracted, use null or [].
 ''';
 
-  static String _buildUserPrompt(String query) => '''
+  static String _buildUserPrompt(String query) =>
+      '''
 Parse this real estate query and return the JSON:
 
 "$query"
@@ -143,6 +144,11 @@ Parse this real estate query and return the JSON:
       }
     }
 
+    final fallback = _parseLocally(trimmed);
+    if (!fallback.isEmpty) {
+      return fallback;
+    }
+
     throw lastError ?? const QueryParseException('Unknown parsing error.');
   }
 
@@ -163,5 +169,159 @@ Parse this real estate query and return the JSON:
       throw const FormatException('Top-level JSON value must be an object.');
     }
     return decoded;
+  }
+
+  static ParsedQuery _parseLocally(String query) {
+    final lower = query.toLowerCase();
+
+    int? bhk;
+    final digitBhk = RegExp(r'(\d+)\s*(?:bhk|bed|bedroom)').firstMatch(lower);
+    if (digitBhk != null) {
+      bhk = int.tryParse(digitBhk.group(1)!);
+    } else if (lower.contains('studio')) {
+      bhk = 1;
+    } else if (lower.contains('one bedroom') ||
+        lower.contains('single bedroom')) {
+      bhk = 1;
+    } else if (lower.contains('two bedroom') ||
+        lower.contains('double bedroom')) {
+      bhk = 2;
+    } else if (lower.contains('three bedroom')) {
+      bhk = 3;
+    } else if (lower.contains('four bedroom')) {
+      bhk = 4;
+    }
+
+    double? maxBudget;
+    final rangeBudget = RegExp(
+      r'(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)\s*(lakh|lac|cr|crore)',
+    ).firstMatch(lower);
+    final simpleBudget = RegExp(
+      r'(?:under|below|upto|up to|less than)?\s*(?:rs\.?|₹)?\s*(\d+(?:\.\d+)?)\s*(lakh|lac|cr|crore)',
+    ).firstMatch(lower);
+    if (rangeBudget != null) {
+      final value = double.tryParse(rangeBudget.group(2)!);
+      maxBudget = _convertBudget(value, rangeBudget.group(3)!);
+    } else if (simpleBudget != null) {
+      final value = double.tryParse(simpleBudget.group(1)!);
+      maxBudget = _convertBudget(value, simpleBudget.group(2)!);
+    }
+
+    String? location;
+    final sector = RegExp(r'sector\s*(\d+)').firstMatch(lower);
+    if (sector != null) {
+      location = 'Sector ${sector.group(1)}';
+    } else if (lower.contains('dlf phase 1')) {
+      location = 'DLF Phase 1';
+    } else if (lower.contains('golf course road')) {
+      location = 'Golf Course Road';
+    } else if (lower.contains('sohna road')) {
+      location = 'Sohna Road';
+    } else if (lower.contains('gurgaon') || lower.contains('gurugram')) {
+      location = 'Gurgaon';
+    }
+
+    String? landmark;
+    const landmarkCandidates = [
+      'dps',
+      'gd goenka',
+      'pathways',
+      'shriram',
+      'medanta',
+      'artemis',
+      'fortis',
+      'cyber city',
+    ];
+    for (final item in landmarkCandidates) {
+      if (lower.contains(item)) {
+        landmark = _titleCase(item);
+        break;
+      }
+    }
+
+    String? propertyType;
+    if (lower.contains('villa')) {
+      propertyType = 'villa';
+    } else if (lower.contains('plot')) {
+      propertyType = 'plot';
+    } else if (lower.contains('house') || lower.contains('independent')) {
+      propertyType = 'house';
+    } else if (lower.contains('flat') || lower.contains('apartment')) {
+      propertyType = 'apartment';
+    }
+
+    String? facing;
+    const facings = [
+      'north-east',
+      'north west',
+      'north-west',
+      'south east',
+      'south-east',
+      'south west',
+      'south-west',
+      'north',
+      'south',
+      'east',
+      'west',
+    ];
+    for (final item in facings) {
+      if (lower.contains(item)) {
+        facing = item.replaceAll(' ', '-');
+        break;
+      }
+    }
+
+    final amenities = <String>[];
+    const amenityCandidates = {
+      'gym': ['gym', 'fitness'],
+      'swimming pool': ['swimming pool', 'pool'],
+      'parking': ['parking'],
+      'lift': ['lift', 'elevator'],
+      'security': ['security', 'gated'],
+      'power backup': ['power backup', 'backup'],
+      'clubhouse': ['clubhouse', 'club house'],
+      'garden': ['garden', 'park'],
+      'metro': ['metro'],
+      'sunlight': ['sunlight', 'sunny'],
+    };
+    for (final entry in amenityCandidates.entries) {
+      if (entry.value.any(lower.contains)) {
+        amenities.add(entry.key);
+      }
+    }
+
+    bool? furnished;
+    if (lower.contains('unfurnished') || lower.contains('bare shell')) {
+      furnished = false;
+    } else if (lower.contains('furnished') ||
+        lower.contains('fully furnished')) {
+      furnished = true;
+    }
+
+    return ParsedQuery(
+      bhk: bhk,
+      maxBudget: maxBudget,
+      location: location,
+      landmark: landmark,
+      propertyType: propertyType,
+      facing: facing,
+      amenities: amenities,
+      furnished: furnished,
+    );
+  }
+
+  static double? _convertBudget(double? value, String unit) {
+    if (value == null) return null;
+    if (unit == 'lakh' || unit == 'lac') return value * 100000;
+    if (unit == 'cr' || unit == 'crore') return value * 10000000;
+    return null;
+  }
+
+  static String _titleCase(String value) {
+    return value
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
+        .join(' ');
   }
 }

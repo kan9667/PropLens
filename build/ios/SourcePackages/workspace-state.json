@@ -9,12 +9,12 @@
         "packageRef" : {
           "identity" : "flutterframework",
           "kind" : "fileSystem",
-          "location" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework",
+          "location" : "/Users/kanishka/Desktop/proplens/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework",
           "name" : "FlutterFramework"
         },
         "state" : {
           "name" : "fileSystem",
-          "path" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework"
+          "path" : "/Users/kanishka/Desktop/proplens/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework"
         },
         "subpath" : "flutterframework"
       },
@@ -23,12 +23,12 @@
         "packageRef" : {
           "identity" : "shared_preferences_foundation-2.5.6",
           "kind" : "fileSystem",
-          "location" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6",
+          "location" : "/Users/kanishka/Desktop/proplens/ios/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6",
           "name" : "shared_preferences_foundation"
         },
         "state" : {
           "name" : "fileSystem",
-          "path" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6"
+          "path" : "/Users/kanishka/Desktop/proplens/ios/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6"
         },
         "subpath" : "shared_preferences_foundation-2.5.6"
       },
@@ -37,12 +37,12 @@
         "packageRef" : {
           "identity" : "sqflite_darwin-2.4.3",
           "kind" : "fileSystem",
-          "location" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/sqflite_darwin-2.4.3",
+          "location" : "/Users/kanishka/Desktop/proplens/ios/Flutter/ephemeral/Packages/.packages/sqflite_darwin-2.4.3",
           "name" : "sqflite_darwin"
         },
         "state" : {
           "name" : "fileSystem",
-          "path" : "/Users/kanishka/Desktop/ghar_360/ios/Flutter/ephemeral/Packages/.packages/sqflite_darwin-2.4.3"
+          "path" : "/Users/kanishka/Desktop/proplens/ios/Flutter/ephemeral/Packages/.packages/sqflite_darwin-2.4.3"
         },
         "subpath" : "sqflite_darwin-2.4.3"
       }

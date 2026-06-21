@@ -1,6 +1,5 @@
 //stores app state- Provider provides centralized state management through ChangeNotifier. It allows widgets to reactively rebuild when state changes without passing data through multiple widget levels.
 
-
 import 'package:flutter/material.dart';
 import '../data/types.dart';
 import '../data/properties.dart';
@@ -9,7 +8,8 @@ import '../services/query_parser.dart';
 import '../services/property_advisor_service.dart';
 import '../services/llm_service.dart';
 
-class AppProvider extends ChangeNotifier { //fluttr class that provides an observable pattern, allows widgets to listen for statechanges and rebuild when notify listener is called
+class AppProvider extends ChangeNotifier {
+  //fluttr class that provides an observable pattern, allows widgets to listen for statechanges and rebuild when notify listener is called
   AppProvider() {
     results = List.from(mockProperties);
   }
@@ -69,6 +69,21 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
     updateQuery(query);
   }
 
+  void resetToAllProperties() {
+    query = '';
+    aiAnswer = '';
+    aiOverview = null;
+    _activeFilters.clear();
+    results = List.from(mockProperties);
+    for (final p in results) {
+      p.matchScore = null;
+      p.matchReasons = null;
+    }
+    isLoading = false;
+    aiOverviewState = AiState.loaded;
+    notifyListeners();
+  }
+
   Future<void> updateQuery(String newQuery) async {
     query = newQuery;
     aiAnswer = ''; // Clear advisor answer when search context changes
@@ -90,7 +105,7 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
 
     try {
       // Parse natural language query if not empty, otherwise use empty query
-      final parsedQuery = newQuery.trim().isNotEmpty 
+      final parsedQuery = newQuery.trim().isNotEmpty
           ? await QueryParser.parse(newQuery)
           : const ParsedQuery();
 
@@ -161,11 +176,13 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
       if (fallback.isNotEmpty) {
         aiOverview = AiOverview(
           bestMatch: BestMatch(
-            title: '${results.first.bhk} BHK in ${results.first.location.split(',').first}',
+            title:
+                '${results.first.bhk} BHK in ${results.first.location.split(',').first}',
             priceDisplay: results.first.priceDisplay,
             matchScore: results.first.matchScore ?? 0.85,
           ),
-          quickInsights: results.first.matchReasons?.take(3).toList() ??
+          quickInsights:
+              results.first.matchReasons?.take(3).toList() ??
               ['Matches your search', 'Verified listing', 'Gurugram location'],
           fullAnalysis: 'Found ${results.length} properties matching "$query".',
           bestMatchReason: fallback['BEST_MATCH'] ?? '',
@@ -205,7 +222,6 @@ class AppProvider extends ChangeNotifier { //fluttr class that provides an obser
     isAiLoading = false;
     notifyListeners();
   }
-  
 
   void updateResults(List<Property> newResults) {
     results = newResults;

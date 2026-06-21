@@ -24,6 +24,8 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _propertyGridKey = GlobalKey();
   final GlobalKey _advisorKey = GlobalKey();
+  final TextEditingController _listingSearchController =
+      TextEditingController();
 
   // Empty State animations
   late AnimationController _emptyStateRotateController;
@@ -35,25 +37,40 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<Offset> _overviewSlide;
 
   bool _isOverviewExpanded = false;
+  bool _showAllProperties = false;
+  bool _isPropertyListExpanded = false;
 
   @override
   void initState() {
     super.initState();
 
     // 1. Empty State rotate (20s)
-    _emptyStateRotateController = AnimationController(vsync: this, duration: const Duration(seconds: 20))..repeat();
+    _emptyStateRotateController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
 
     // 2. Empty State center icon pulse
-    _emptyStatePulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 2500))..repeat(reverse: true);
+    _emptyStatePulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500),
+    )..repeat(reverse: true);
 
     // 3. AI Overview card transition
-    _overviewController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _overviewController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
     _overviewFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _overviewController, curve: Curves.easeOutCubic),
     );
-    _overviewSlide = Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
-      CurvedAnimation(parent: _overviewController, curve: Curves.easeOutCubic),
-    );
+    _overviewSlide =
+        Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _overviewController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     AdvisorNavigation.scrollToAdvisor = scrollToAdvisor;
   }
@@ -62,6 +79,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     AdvisorNavigation.scrollToAdvisor = null;
     _scrollController.dispose();
+    _listingSearchController.dispose();
     _emptyStateRotateController.dispose();
     _emptyStatePulseController.dispose();
     _overviewController.dispose();
@@ -93,7 +111,23 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _triggerSearch(String queryText) {
+    setState(() {
+      _showAllProperties = false;
+      _isPropertyListExpanded = true;
+      _listingSearchController.text = queryText;
+    });
     context.read<AppProvider>().updateQuery(queryText);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToResults());
+  }
+
+  void _showProperties() {
+    setState(() {
+      _showAllProperties = true;
+      _isPropertyListExpanded = false;
+      _isOverviewExpanded = false;
+      _listingSearchController.clear();
+    });
+    context.read<AppProvider>().resetToAllProperties();
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToResults());
   }
 
@@ -103,6 +137,11 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final comparisonProvider = context.watch<ComparisonProvider>();
     final canCompare = comparisonProvider.count >= 2;
     final hasSearched = provider.query.trim().isNotEmpty;
+    final hasActiveFilters = provider.activeFilters.isNotEmpty;
+    final shouldShowResults =
+        hasSearched || hasActiveFilters || _showAllProperties;
+    final isBrowsingAllProperties =
+        _showAllProperties && !hasSearched && !hasActiveFilters;
 
     // Reactively drive Overview Entry transitions
     if (hasSearched && !provider.isLoading) {
@@ -126,9 +165,6 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 // SECTION 2: Hero Area
                 HeroSearchWidget(onSearchTriggered: _triggerSearch),
 
-                // SECTION 3: Trust Bar
-                _buildTrustBar(constraints.maxWidth),
-
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: isDesktop ? 48 : 16,
@@ -137,7 +173,16 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (hasSearched) _buildResultsSection(provider) else _buildEmptyState(),
+                      if (shouldShowResults)
+                        _buildResultsSection(
+                          provider,
+                          showOverview: hasSearched || hasActiveFilters,
+                          limitListings:
+                              isBrowsingAllProperties &&
+                              !_isPropertyListExpanded,
+                        )
+                      else
+                        _buildEmptyState(),
                     ],
                   ),
                 ),
@@ -146,6 +191,8 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   key: _advisorKey,
                   child: const PropertyAdvisorWidget(),
                 ),
+                const SizedBox(height: 24),
+                _buildTrustBar(constraints.maxWidth),
                 const SizedBox(height: 100),
               ],
             ),
@@ -162,7 +209,9 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const ComparisonScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const ComparisonScreen(),
+                      ),
                     );
                   },
                   backgroundColor: AppColors.secondary,
@@ -192,20 +241,32 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
-        child: Container(
-          color: AppColors.border,
-          height: 1.0,
-        ),
+        child: Container(color: AppColors.border, height: 1.0),
       ),
       title: const AppLogo(),
       actions: isDesktop
           ? [
-              TextButton(onPressed: () {}, child: const Text("Properties", style: TextStyle(color: AppColors.textSecond))),
-              TextButton(onPressed: () {}, child: const Text("Virtual Tours", style: TextStyle(color: AppColors.textSecond))),
+              TextButton(
+                onPressed: _showProperties,
+                child: const Text(
+                  "Properties",
+                  style: TextStyle(color: AppColors.textSecond),
+                ),
+              ),
               TextButton.icon(
                 onPressed: scrollToAdvisor,
-                icon: const Icon(Icons.psychology_outlined, size: 18, color: AppColors.primary),
-                label: const Text("AI Advisor", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                icon: const Icon(
+                  Icons.psychology_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+                label: const Text(
+                  "AI Advisor",
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               const SizedBox(width: 12),
               Padding(
@@ -223,7 +284,10 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       shadowColor: Colors.transparent,
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                     ),
-                    child: const Text("Get Started →", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      "Get Started →",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ),
               ),
@@ -232,51 +296,196 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           : [
               TextButton.icon(
                 onPressed: scrollToAdvisor,
-                icon: const Icon(Icons.psychology_outlined, size: 18, color: AppColors.primary),
-                label: const Text('Advisor', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                icon: const Icon(
+                  Icons.psychology_outlined,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+                label: const Text(
+                  'Advisor',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
               IconButton(
-                icon: const Icon(Icons.menu_rounded, color: AppColors.textPrimary),
+                icon: const Icon(
+                  Icons.menu_rounded,
+                  color: AppColors.textPrimary,
+                ),
                 onPressed: () {},
               ),
             ],
     );
   }
 
-  Widget _buildResultsSection(AppProvider provider) {
+  Widget _buildResultsSection(
+    AppProvider provider, {
+    required bool showOverview,
+    required bool limitListings,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AnimatedBuilder(
-          animation: _overviewController,
-          builder: (context, child) {
-            return FadeTransition(
-              opacity: _overviewFade,
-              child: SlideTransition(
-                position: _overviewSlide,
-                child: child,
-              ),
-            );
-          },
-          child: AiOverviewWidget(
-            results: provider.results,
-            userQuery: provider.query,
-            overview: provider.aiOverview,
-            state: provider.aiOverviewState,
-            isExpanded: _isOverviewExpanded,
-            onExpand: () {
-              setState(() {
-                _isOverviewExpanded = !_isOverviewExpanded;
-              });
+        if (showOverview) ...[
+          AnimatedBuilder(
+            animation: _overviewController,
+            builder: (context, child) {
+              return FadeTransition(
+                opacity: _overviewFade,
+                child: SlideTransition(position: _overviewSlide, child: child),
+              );
             },
+            child: AiOverviewWidget(
+              results: provider.results,
+              userQuery: provider.query,
+              overview: provider.aiOverview,
+              state: provider.aiOverviewState,
+              isExpanded: _isOverviewExpanded,
+              onExpand: () {
+                setState(() {
+                  _isOverviewExpanded = !_isOverviewExpanded;
+                });
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
+        ],
         KeyedSubtree(
           key: _propertyGridKey,
-          child: const PropertyGrid(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildListingSearchHeader(provider),
+              const SizedBox(height: 12),
+              PropertyGrid(maxItems: limitListings ? 3 : null),
+              if (limitListings && provider.results.length > 3)
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isPropertyListExpanded = true;
+                      });
+                    },
+                    icon: const Icon(Icons.expand_more_rounded),
+                    label: Text(
+                      'View all ${provider.results.length} properties',
+                    ),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildListingSearchHeader(AppProvider provider) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isCompact = constraints.maxWidth < 620;
+          final searchField = TextField(
+            controller: _listingSearchController,
+            decoration: InputDecoration(
+              hintText: 'Search all properties',
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                color: AppColors.textHint,
+              ),
+              suffixIcon: provider.query.trim().isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: _showProperties,
+                    )
+                  : null,
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 1.5,
+                ),
+              ),
+              isDense: true,
+            ),
+            onSubmitted: _triggerSearch,
+          );
+          final searchButton = ElevatedButton.icon(
+            onPressed: () => _triggerSearch(_listingSearchController.text),
+            icon: const Icon(Icons.search_rounded, size: 18),
+            label: const Text('Search'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                provider.query.trim().isEmpty ? 'All Properties' : 'Properties',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${provider.results.length} properties listed',
+                style: const TextStyle(
+                  color: AppColors.textSecond,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (isCompact)
+                Column(
+                  children: [
+                    searchField,
+                    const SizedBox(height: 10),
+                    SizedBox(width: double.infinity, child: searchButton),
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(child: searchField),
+                    const SizedBox(width: 10),
+                    searchButton,
+                  ],
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -318,7 +527,9 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        border: Border.symmetric(horizontal: BorderSide(color: AppColors.border, width: 1)),
+        border: Border.symmetric(
+          horizontal: BorderSide(color: AppColors.border, width: 1),
+        ),
       ),
       padding: EdgeInsets.fromLTRB(horizontalPad, 20, horizontalPad, 24),
       child: isMobile
@@ -382,9 +593,10 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.accent.withOpacity(0.3),
+                    color: AppColors.accent.withValues(alpha: 0.3),
                     width: 2,
-                    style: BorderStyle.solid, // dashed simulated rotated solid border
+                    style: BorderStyle
+                        .solid, // dashed simulated rotated solid border
                   ),
                 ),
               ),
@@ -393,10 +605,7 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               animation: _emptyStatePulseController,
               builder: (context, child) {
                 final scale = 1.0 + (_emptyStatePulseController.value * 0.08);
-                return Transform.scale(
-                  scale: scale,
-                  child: child,
-                );
+                return Transform.scale(scale: scale, child: child);
               },
               child: Container(
                 width: 60,
@@ -405,7 +614,11 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: AppColors.primaryLight,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.home_work_rounded, size: 28, color: AppColors.primary),
+                child: const Icon(
+                  Icons.home_work_rounded,
+                  size: 28,
+                  color: AppColors.primary,
+                ),
               ),
             ),
           ],
@@ -436,7 +649,11 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         const SizedBox(height: 20),
         const Text(
           "Popular searches:",
-          style: TextStyle(fontSize: 11, color: AppColors.textSecond, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 11,
+            color: AppColors.textSecond,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -473,7 +690,11 @@ class HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               style: const TextStyle(fontSize: 12, color: AppColors.textSecond),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.north_east_rounded, size: 12, color: AppColors.textHint),
+            const Icon(
+              Icons.north_east_rounded,
+              size: 12,
+              color: AppColors.textHint,
+            ),
           ],
         ),
       ),

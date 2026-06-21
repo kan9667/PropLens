@@ -15,7 +15,9 @@ class _GridLayout {
 }
 
 class PropertyGrid extends StatelessWidget {
-  const PropertyGrid({super.key});
+  final int? maxItems;
+
+  const PropertyGrid({super.key, this.maxItems});
 
   _GridLayout _layoutForWidth(double width, double textScale) {
     final scale = textScale.clamp(1.0, 1.35);
@@ -32,7 +34,8 @@ class PropertyGrid extends StatelessWidget {
     const gridPadding = 24.0;
     const crossAxisSpacing = 10.0;
     final itemWidth =
-        (width - gridPadding - crossAxisSpacing * (crossAxisCount - 1)) / crossAxisCount;
+        (width - gridPadding - crossAxisSpacing * (crossAxisCount - 1)) /
+        crossAxisCount;
     final imageHeight = itemWidth / 1.5;
     final metaHeight = 96.0 * scale + (scale > 1.05 ? 12.0 : 0.0);
 
@@ -80,16 +83,19 @@ class PropertyGrid extends StatelessWidget {
       );
     }
 
+    final visibleItemCount =
+        maxItems == null || provider.results.length <= maxItems!
+        ? provider.results.length
+        : maxItems!;
+
     return GridView.builder(
       padding: const EdgeInsets.all(12),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: provider.results.length,
+      itemCount: visibleItemCount,
       gridDelegate: gridDelegate,
       itemBuilder: (context, index) {
-        return PropertyCard(
-          property: provider.results[index],
-        );
+        return PropertyCard(property: provider.results[index]);
       },
     );
   }

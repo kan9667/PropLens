@@ -53,7 +53,7 @@ class AppTheme {
     borderRadius: BorderRadius.circular(16),
     boxShadow: [
       BoxShadow(
-        color: const Color(0xFF1A6B4A).withOpacity(0.08),
+        color: const Color(0xFF1A6B4A).withValues(alpha: 0.08),
         blurRadius: 24,
         offset: const Offset(0, 8),
       ),

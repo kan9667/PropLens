@@ -145,7 +145,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                 leading: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CircleAvatar(
-                    backgroundColor: Colors.black.withOpacity(0.4),
+                    backgroundColor: Colors.black.withValues(alpha: 0.4),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                       onPressed: () => Navigator.pop(context),
@@ -158,7 +158,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                   Padding(
                     padding: const EdgeInsets.only(right: 12.0),
                     child: CircleAvatar(
-                      backgroundColor: Colors.black.withOpacity(0.4),
+                      backgroundColor: Colors.black.withValues(alpha: 0.4),
                       child: IconButton(
                         icon: const Icon(Icons.share, color: Colors.white),
                         onPressed: () {
@@ -213,7 +213,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                                   shape: BoxShape.circle,
                                   color: _currentImageIndex == index
                                       ? Colors.white
-                                      : Colors.white.withOpacity(0.4),
+                                      : Colors.white.withValues(alpha: 0.4),
                                 ),
                               ),
                             ),
@@ -314,13 +314,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            AppColors.primaryLight.withOpacity(isDark ? 0.15 : 0.8),
+                            AppColors.primaryLight.withValues(alpha: isDark ? 0.15 : 0.8),
                             isDark ? Colors.grey.shade900 : Colors.white,
                           ],
                         ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.primary.withOpacity(0.2),
+                          color: AppColors.primary.withValues(alpha: 0.2),
                           width: 1,
                         ),
                       ),
@@ -422,7 +422,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.successLight.withOpacity(isDark ? 0.15 : 0.8),
+                                color: AppColors.successLight.withValues(alpha: isDark ? 0.15 : 0.8),
                                 borderRadius: BorderRadius.circular(8),
                                 border: const Border(
                                   left: BorderSide(
@@ -474,7 +474,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                 color: isDark ? Colors.grey.shade900 : Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, -4),
                   ),
@@ -541,7 +541,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.06),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -694,13 +694,13 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isExpanded
-              ? AppColors.primary.withOpacity(0.25)
+              ? AppColors.primary.withValues(alpha: 0.25)
               : (isDark ? Colors.grey.shade800 : AppColors.divider),
         ),
         boxShadow: isExpanded
             ? [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.06),
+                  color: AppColors.primary.withValues(alpha: 0.06),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -720,7 +720,7 @@ class _PropertyDetailsScreenState extends State<PropertyDetailsScreen> with Tick
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withOpacity(isDark ? 0.2 : 1),
+                      color: AppColors.primaryLight.withValues(alpha: isDark ? 0.2 : 1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(icon, size: 18, color: AppColors.primary),
@@ -797,7 +797,7 @@ class FavoriteButton extends StatelessWidget {
     final appProvider = context.watch<AppProvider>();
     final isFavorite = appProvider.isFavorite(propertyId);
     return CircleAvatar(
-      backgroundColor: Colors.black.withOpacity(0.4),
+      backgroundColor: Colors.black.withValues(alpha: 0.4),
       child: IconButton(
         icon: Icon(
           isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -850,11 +850,11 @@ class _CompactDetailTileState extends State<_CompactDetailTile> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: _pressed
-                ? AppColors.primaryLight.withOpacity(widget.isDark ? 0.3 : 1)
+                ? AppColors.primaryLight.withValues(alpha: widget.isDark ? 0.3 : 1)
                 : (widget.isDark ? Colors.grey.shade800 : AppColors.surface),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: _pressed ? AppColors.primary.withOpacity(0.4) : AppColors.divider,
+              color: _pressed ? AppColors.primary.withValues(alpha: 0.4) : AppColors.divider,
             ),
           ),
           child: Column(
@@ -937,7 +937,7 @@ class _NearbyGroup extends StatelessWidget {
                   width: 4,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.6),
+                    color: iconColor.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -1056,7 +1056,7 @@ class _DetailMatchScoreBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: color,

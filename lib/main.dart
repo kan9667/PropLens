@@ -7,16 +7,14 @@ import 'providers/app_provider.dart';
 import 'providers/comparison_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-Future<void> main() async { // async allows asynchronous operations to complete without blocking the ui thread
+Future<void> main() async {
+  // async allows asynchronous operations to complete without blocking the ui thread
   WidgetsFlutterBinding.ensureInitialized(); //make sure flutter engine is fully initialized
 
-  
   await dotenv.load(fileName: ".env");
 
- 
-
-
-  runApp( //starts rendering ui
+  runApp(
+    //starts rendering ui
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()),

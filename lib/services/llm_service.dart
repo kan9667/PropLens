@@ -3,62 +3,49 @@
 import 'dart:convert'; //provides json encode and decode
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../data/types.dart';
 
 class LlmService {
-  static Future<String> ask(
-  String prompt, {
-  String? systemPrompt,
-}) async {
-    final apiKey =
-        dotenv.env['OPENROUTER_API_KEY'];
+  static String get _apiKey => dotenv.env['OPENROUTER_API_KEY'] ?? '';
+  static bool get hasApiKey => _apiKey.trim().isNotEmpty;
 
-    if (apiKey == null || apiKey.isEmpty) {
+  static Future<String> ask(String prompt, {String? systemPrompt}) async {
+    if (!hasApiKey) {
       throw Exception('Missing API Key');
     }
 
-    final response = await http.post( //sends data to openrouter
-      Uri.parse(
-        'https://openrouter.ai/api/v1/chat/completions',
-      ),
+    final response = await http.post(
+      //sends data to openrouter
+      Uri.parse('https://openrouter.ai/api/v1/chat/completions'),
 
-      headers: { //provides metadata
-        'Authorization': 'Bearer $apiKey', //allowed to use open router
-        'Content-Type': 'application/json', //tells open router the req body contains JSON
+      headers: {
+        //provides metadata
+        'Authorization': 'Bearer $_apiKey', //allowed to use open router
+        'Content-Type':
+            'application/json', //tells open router the req body contains JSON
       },
 
-      body: jsonEncode({ //dart object becomes json
-        'model':
-            'google/gemma-3-27b-it',
+      body: jsonEncode({
+        //dart object becomes json
+        'model': 'google/gemma-3-27b-it',
 
         'messages': [
-  if (systemPrompt != null)
-    {
-      'role': 'system',
-      'content': systemPrompt,
-    },
+          if (systemPrompt != null) {'role': 'system', 'content': systemPrompt},
 
-  {
-    'role': 'user',
-    'content': prompt,
-  },
-],
+          {'role': 'user', 'content': prompt},
+        ],
       }),
     );
 
     if (response.statusCode != 200) {
-      throw Exception(
-        'API Error: ${response.body}',
-      );
+      throw Exception('API Error: ${response.body}');
     }
 
-    final data =
-        jsonDecode(response.body); //json response becomes dart object
+    final data = jsonDecode(response.body); //json response becomes dart object
 
-    return data['choices'][0]
-        ['message']['content'];
+    return data['choices'][0]['message']['content'];
   }
 
   static Future<AiOverview> generateOverview({
@@ -74,7 +61,8 @@ class LlmService {
           matchScore: 0.0,
         ),
         quickInsights: ['Try a different query'],
-        fullAnalysis: 'We couldn\'t find any properties matching your criteria. Try adjusting your budget, location, or amenities filters.',
+        fullAnalysis:
+            'We couldn\'t find any properties matching your criteria. Try adjusting your budget, location, or amenities filters.',
         bestMatchReason: 'No match reason',
         fullRecommendation: {},
       );
@@ -89,29 +77,45 @@ class LlmService {
         ? best.matchReasons!.take(3).toList()
         : ['Matches BHK requirement', 'Located in Gurgaon'];
 
-    String analysis = '';
-    try {
-      final propertiesSummary = results.take(3).map((p) => {
-        'bhk': p.bhk,
-        'price': '₹${(p.price / 100000).toStringAsFixed(0)}L',
-        'location': p.location,
-        'amenities': p.amenities.take(3).toList(),
-      }).toList();
+    final fallback = buildFallbackRecommendation(
+      results: results,
+      query: query,
+      activeFilters: activeFilters,
+    );
 
-      final filtersContext = (activeFilters != null && activeFilters.isNotEmpty)
-          ? "Active Filters: ${activeFilters.entries.map((e) => '${e.key}: ${e.value}').join(', ')}"
-          : "";
+    String analysis =
+        'Found ${results.length} matching properties. $bestTitle represents the best match at $bestPrice with a match rating of ${(bestScore * 100).toStringAsFixed(0)}%.';
 
-      final prompt = 'Provide a brief summary card overview of the best properties that match this search query: "$query".${filtersContext.isNotEmpty ? "\n$filtersContext" : ""}\nHere are the top properties to choose from: ${jsonEncode(propertiesSummary)}.';
-      analysis = await ask(
-        prompt,
-        systemPrompt: 'You are an AI Overview assistant. Write a highly concise 2-sentence summary comparing these properties and showing why they match. Do not include markdown.',
-      );
-    } catch (e) {
-      analysis = 'Found ${results.length} matching properties. $bestTitle represents the best match at $bestPrice with a match rating of ${(bestScore * 100).toStringAsFixed(0)}%.';
+    if (hasApiKey) {
+      try {
+        final propertiesSummary = results
+            .take(3)
+            .map(
+              (p) => {
+                'bhk': p.bhk,
+                'price': '₹${(p.price / 100000).toStringAsFixed(0)}L',
+                'location': p.location,
+                'amenities': p.amenities.take(3).toList(),
+              },
+            )
+            .toList();
+
+        final filtersContext =
+            (activeFilters != null && activeFilters.isNotEmpty)
+            ? "Active Filters: ${activeFilters.entries.map((e) => '${e.key}: ${e.value}').join(', ')}"
+            : "";
+
+        final prompt =
+            'Provide a brief summary card overview of the best properties that match this search query: "$query".${filtersContext.isNotEmpty ? "\n$filtersContext" : ""}\nHere are the top properties to choose from: ${jsonEncode(propertiesSummary)}.';
+        analysis = await ask(
+          prompt,
+          systemPrompt:
+              'You are an AI Overview assistant. Write a highly concise 2-sentence summary comparing these properties and showing why they match. Do not include markdown.',
+        );
+      } catch (e) {
+        debugPrint('Overview generation error: $e');
+      }
     }
-
-    final fallback = buildFallbackRecommendation(results: results, query: query, activeFilters: activeFilters);
 
     return AiOverview(
       bestMatch: BestMatch(
@@ -121,7 +125,9 @@ class LlmService {
       ),
       quickInsights: insights,
       fullAnalysis: analysis,
-      bestMatchReason: fallback['BEST_MATCH'] ?? (insights.isNotEmpty ? insights.first : 'Matches search criteria'),
+      bestMatchReason:
+          fallback['BEST_MATCH'] ??
+          (insights.isNotEmpty ? insights.first : 'Matches search criteria'),
       fullRecommendation: fallback,
     );
   }
@@ -143,7 +149,7 @@ class LlmService {
         ...best.matchReasons!.take(4)
       else ...[
         'Matches your $query search criteria',
-        '${best.bhk} BHK layout in ${bestLocation}',
+        '${best.bhk} BHK layout in $bestLocation',
         'Amenities: ${best.amenities.take(3).join(', ')}',
         '${best.furnishing} unit on floor ${best.floor}/${best.totalFloors}',
       ],
@@ -213,20 +219,31 @@ class LlmService {
   }) async {
     if (results.isEmpty) return {};
 
-    final fallback = buildFallbackRecommendation(results: results, query: query, activeFilters: activeFilters);
+    final fallback = buildFallbackRecommendation(
+      results: results,
+      query: query,
+      activeFilters: activeFilters,
+    );
 
-    final topThree = results.take(3).map((p) => {
-      'id': p.id,
-      'bhk': p.bhk,
-      'price': '₹${(p.price / 100000).toStringAsFixed(0)}L',
-      'location': p.location,
-      'amenities': p.amenities,
-      'nearbySchools': p.nearbySchools,
-      'nearbyHospitals': p.nearbyHospitals,
-      'furnishing': p.furnishing,
-      'parking': p.parking,
-      'ageYears': p.ageYears,
-    }).toList();
+    if (!hasApiKey) return fallback;
+
+    final topThree = results
+        .take(3)
+        .map(
+          (p) => {
+            'id': p.id,
+            'bhk': p.bhk,
+            'price': '₹${(p.price / 100000).toStringAsFixed(0)}L',
+            'location': p.location,
+            'amenities': p.amenities,
+            'nearbySchools': p.nearbySchools,
+            'nearbyHospitals': p.nearbyHospitals,
+            'furnishing': p.furnishing,
+            'parking': p.parking,
+            'ageYears': p.ageYears,
+          },
+        )
+        .toList();
 
     const systemPrompt = '''
 You are an expert Indian real estate advisor. Analyze these properties and the user's query. Return a structured recommendation with these exact sections separated by headers:
@@ -239,7 +256,8 @@ Keep each section under 80 words.
         ? "Active Filters: ${activeFilters.entries.map((e) => '${e.key}: ${e.value}').join(', ')}"
         : "";
 
-    final userPrompt = '''
+    final userPrompt =
+        '''
 User query: $query
 ${filtersContext.isNotEmpty ? "$filtersContext\n" : ""}Properties: ${jsonEncode(topThree)}
 Provide the full analysis.
@@ -250,7 +268,7 @@ Provide the full analysis.
       final parsed = _parseFullRecommendation(response);
       return mergeRecommendations(parsed, fallback);
     } catch (e) {
-      debugPrint('Error generating full recommendation: $e');
+      debugPrint('Full recommendation unavailable: $e');
       return fallback;
     }
   }
@@ -267,7 +285,7 @@ Provide the full analysis.
       'FAMILY',
       'APPRECIATION',
       'SCHOOLS',
-      'HOSPITALS'
+      'HOSPITALS',
     ];
 
     for (int i = 0; i < sections.length; i++) {
@@ -275,7 +293,9 @@ Provide the full analysis.
       final nextSection = i + 1 < sections.length ? sections[i + 1] : null;
 
       final regExpStart = RegExp(
-        r'(?:^|\n|\r)\s*(?:\*{1,3}|#|\d\.)?\s*' + currentSection + r'\s*(?::|-|\||\n)?',
+        r'(?:^|\n|\r)\s*(?:\*{1,3}|#|\d\.)?\s*' +
+            currentSection +
+            r'\s*(?::|-|\||\n)?',
         caseSensitive: false,
       );
       final matchStart = regExpStart.firstMatch(raw);
@@ -286,7 +306,9 @@ Provide the full analysis.
 
         if (nextSection != null) {
           final regExpEnd = RegExp(
-            r'(?:^|\n|\r)\s*(?:\*{1,3}|#|\d\.)?\s*' + nextSection + r'\s*(?::|-|\||\n)?',
+            r'(?:^|\n|\r)\s*(?:\*{1,3}|#|\d\.)?\s*' +
+                nextSection +
+                r'\s*(?::|-|\||\n)?',
             caseSensitive: false,
           );
           final matchEnd = regExpEnd.firstMatch(raw);
@@ -326,10 +348,16 @@ Provide the full analysis.
       'totalFloors': property.totalFloors,
     };
 
-    final systemPrompt = 'You are Ghar360\'s expert AI Property Advisor. The user is asking a question about a specific property. Answer the question comprehensively but concisely based on the property details provided. Keep your answer under 100 words and be specific to Indian real estate market details.';
-    
-    final prompt = 'Property Details:\n${jsonEncode(propertyJson)}\n\nUser Question: $question\n\nProvide the analysis:';
-    
+    final systemPrompt =
+        'You are Ghar360\'s expert AI Property Advisor. The user is asking a question about a specific property. Answer the question comprehensively but concisely based on the property details provided. Keep your answer under 100 words and be specific to Indian real estate market details.';
+
+    final prompt =
+        'Property Details:\n${jsonEncode(propertyJson)}\n\nUser Question: $question\n\nProvide the analysis:';
+
+    if (!hasApiKey) {
+      return 'AI analysis needs an OpenRouter API key. Run the app with --dart-define=OPENROUTER_API_KEY=your_key_here to enable this feature.';
+    }
+
     try {
       return await ask(prompt, systemPrompt: systemPrompt);
     } catch (e) {

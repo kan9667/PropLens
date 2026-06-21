@@ -43,7 +43,7 @@ class _PropertyImageCubeState extends State<PropertyImageCube> with SingleTicker
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
-          errorBuilder: (_, __, ___) => Container(
+          errorBuilder: (_, _, _) => Container(
             color: AppColors.primaryLight,
             alignment: Alignment.center,
             child: const Icon(Icons.home_work_rounded, color: AppColors.primary, size: 16),

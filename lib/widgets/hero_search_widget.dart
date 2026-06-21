@@ -15,7 +15,8 @@ class HeroSearchWidget extends StatefulWidget {
   State<HeroSearchWidget> createState() => _HeroSearchWidgetState();
 }
 
-class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProviderStateMixin {
+class _HeroSearchWidgetState extends State<HeroSearchWidget>
+    with TickerProviderStateMixin {
   // Search Bar Pop-Out Controller
   late AnimationController _searchAnimController;
   late Animation<double> _searchScale;
@@ -35,19 +36,21 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
   bool _isListening = false;
 
   // Recent Searches State
-  List<String> _recentSearches = [
+  final List<String> _recentSearches = [
     "2BHK Sector 50",
     "Under 80L",
     "3BHK near metro",
     "Ready to move",
-    "Sector 57 villa"
+    "Sector 57 villa",
   ];
 
   void _addRecentSearch(String query) {
     final trimmed = query.trim();
     if (trimmed.isEmpty) return;
     setState(() {
-      _recentSearches.removeWhere((item) => item.toLowerCase() == trimmed.toLowerCase());
+      _recentSearches.removeWhere(
+        (item) => item.toLowerCase() == trimmed.toLowerCase(),
+      );
       _recentSearches.insert(0, trimmed);
       if (_recentSearches.length > 5) {
         _recentSearches.removeLast();
@@ -68,7 +71,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
     "2 BHK in Gurugram under ₹80L...",
     "Villa with pool near DPS school...",
     "Furnished flat near Cyber City...",
-    "3 BHK ready to move in Sector 50..."
+    "3 BHK ready to move in Sector 50...",
   ];
 
   @override
@@ -76,27 +79,47 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
     super.initState();
 
     // 1. Search Pop-out Spring (elasticOut)
-    _searchAnimController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _searchAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _searchScale = Tween<double>(begin: 0.85, end: 1.0).animate(
       CurvedAnimation(parent: _searchAnimController, curve: Curves.elasticOut),
     );
     _searchOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _searchAnimController, curve: Curves.easeIn),
     );
-    _searchSlide = Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
-      CurvedAnimation(parent: _searchAnimController, curve: Curves.elasticOut),
-    );
+    _searchSlide =
+        Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _searchAnimController,
+            curve: Curves.elasticOut,
+          ),
+        );
 
     // 2. Stagger entry animations
-    _entryController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
+    _entryController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
     _titleFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _entryController, curve: const Interval(0.1, 0.6, curve: Curves.easeOut)),
+      CurvedAnimation(
+        parent: _entryController,
+        curve: const Interval(0.1, 0.6, curve: Curves.easeOut),
+      ),
     );
-    _titleSlide = Tween<Offset>(begin: const Offset(0.0, 0.08), end: Offset.zero).animate(
-      CurvedAnimation(parent: _entryController, curve: const Interval(0.1, 0.6, curve: Curves.easeOutCubic)),
-    );
+    _titleSlide =
+        Tween<Offset>(begin: const Offset(0.0, 0.08), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _entryController,
+            curve: const Interval(0.1, 0.6, curve: Curves.easeOutCubic),
+          ),
+        );
     _titleScale = Tween<double>(begin: 0.75, end: 1.0).animate(
-      CurvedAnimation(parent: _entryController, curve: const Interval(0.1, 0.7, curve: Curves.elasticOut)),
+      CurvedAnimation(
+        parent: _entryController,
+        curve: const Interval(0.1, 0.7, curve: Curves.elasticOut),
+      ),
     );
     // Focus handler
     _searchFocusNode.addListener(() {
@@ -134,7 +157,9 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
 
   void _showVoiceMessage(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _toggleListening() async {
@@ -186,9 +211,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
         if (isDesktop) {
           return Container(
             width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: AppColors.heroBg,
-            ),
+            decoration: const BoxDecoration(gradient: AppColors.heroBg),
             padding: const EdgeInsets.symmetric(horizontal: 64, vertical: 80),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -198,10 +221,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                   child: _buildLeftColumn(constraints.maxWidth),
                 ),
                 const SizedBox(width: 48),
-                Expanded(
-                  flex: 4,
-                  child: _buildRightColumn(true),
-                ),
+                Expanded(flex: 4, child: _buildRightColumn(true)),
               ],
             ),
           );
@@ -209,9 +229,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
           // Mobile stack
           return Container(
             width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: AppColors.heroBg,
-            ),
+            decoration: const BoxDecoration(gradient: AppColors.heroBg),
             padding: EdgeInsets.symmetric(
               horizontal: constraints.maxWidth < 360 ? 16 : 24,
               vertical: constraints.maxWidth < 360 ? 32 : 48,
@@ -278,7 +296,8 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                         ),
                       ),
                       ShaderMask(
-                        shaderCallback: (bounds) => AppColors.primaryGrad.createShader(bounds),
+                        shaderCallback: (bounds) =>
+                            AppColors.primaryGrad.createShader(bounds),
                         child: Text(
                           'AI-Powered Search',
                           style: TextStyle(
@@ -312,7 +331,9 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: _isSearchFocused ? AppColors.accent : AppColors.border,
+                    color: _isSearchFocused
+                        ? AppColors.accent
+                        : AppColors.border,
                     width: 1.5,
                   ),
                   boxShadow: [
@@ -330,7 +351,9 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                       child: Icon(
                         Icons.search_rounded,
                         key: ValueKey(_isSearchFocused),
-                        color: _isSearchFocused ? AppColors.accent : AppColors.textHint,
+                        color: _isSearchFocused
+                            ? AppColors.accent
+                            : AppColors.textHint,
                         size: 20,
                       ),
                     ),
@@ -342,18 +365,19 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                           if (_searchTextController.text.isEmpty)
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (Widget child, Animation<double> animation) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: SlideTransition(
-                                    position: Tween<Offset>(
-                                      begin: const Offset(0.0, 0.3),
-                                      end: Offset.zero,
-                                    ).animate(animation),
-                                    child: child,
-                                  ),
-                                );
-                              },
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0.0, 0.3),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
                               child: Text(
                                 _hints[_currentHintIndex],
                                 key: ValueKey(_currentHintIndex),
@@ -385,16 +409,16 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                         ],
                       ),
                     ),
-                    Container(
-                      height: 28,
-                      width: 1,
-                      color: AppColors.border,
-                    ),
+                    Container(height: 28, width: 1, color: AppColors.border),
                     const SizedBox(width: 8),
                     IconButton(
                       icon: Icon(
-                        _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
-                        color: _isListening ? AppColors.error : AppColors.textSecond,
+                        _isListening
+                            ? Icons.mic_rounded
+                            : Icons.mic_none_rounded,
+                        color: _isListening
+                            ? AppColors.error
+                            : AppColors.textSecond,
                         size: 20,
                       ),
                       onPressed: _toggleListening,
@@ -403,7 +427,10 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                     GestureDetector(
                       onTap: _onSearch,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           gradient: AppColors.primaryGrad,
                           borderRadius: BorderRadius.circular(12),
@@ -411,11 +438,19 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.search_rounded, size: 16, color: Colors.white),
+                            Icon(
+                              Icons.search_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 6),
                             Text(
                               "Search",
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -432,18 +467,6 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
         _buildRecentSearches(),
         const SizedBox(height: 16),
         _buildFiltersRow(context),
-        const SizedBox(height: 24),
-
-        // Stats row
-        const Row(
-          children: [
-            _StatItem(value: "24/7", label: "AI Advisor"),
-            _VerticalDivider(height: 32),
-            _StatItem(value: "Instant", label: "AI Match"),
-            _VerticalDivider(height: 32),
-            _StatItem(value: "98%", label: "AI Match Rate"),
-          ],
-        ),
       ],
     );
   }
@@ -495,7 +518,12 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                       GestureDetector(
                         onTap: () => _onChipTap(queryText),
                         child: Container(
-                          padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8, right: 6),
+                          padding: const EdgeInsets.only(
+                            left: 12,
+                            top: 8,
+                            bottom: 8,
+                            right: 6,
+                          ),
                           child: Text(
                             queryText,
                             style: const TextStyle(
@@ -538,11 +566,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
         const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.tune_rounded,
-              size: 16,
-              color: AppColors.primary,
-            ),
+            Icon(Icons.tune_rounded, size: 16, color: AppColors.primary),
             SizedBox(width: 4),
             Text(
               "Filters",
@@ -561,11 +585,37 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
-                _buildFilterPill(context, "BHK Type", ['1BHK', '2BHK', '3BHK', '4BHK+']),
-                _buildFilterPill(context, "Budget", ['Under 50L', '50–80L', '80L–1Cr', 'Above 1Cr']),
-                _buildFilterPill(context, "Locality", ['Sector 50', 'Sector 57', 'DLF Phase 1', 'Golf Course Road', 'Sohna Road']),
-                _buildFilterPill(context, "Possession", ['Ready to Move', 'Within 1 Year', 'Under Construction']),
-                _buildFilterPill(context, "Amenities", ['Near Metro', 'Near School', 'Gated Society', 'With Parking', 'East Facing']),
+                _buildFilterPill(context, "BHK Type", [
+                  '1BHK',
+                  '2BHK',
+                  '3BHK',
+                  '4BHK+',
+                ]),
+                _buildFilterPill(context, "Budget", [
+                  'Under 50L',
+                  '50–80L',
+                  '80L–1Cr',
+                  'Above 1Cr',
+                ]),
+                _buildFilterPill(context, "Locality", [
+                  'Sector 50',
+                  'Sector 57',
+                  'DLF Phase 1',
+                  'Golf Course Road',
+                  'Sohna Road',
+                ]),
+                _buildFilterPill(context, "Possession", [
+                  'Ready to Move',
+                  'Within 1 Year',
+                  'Under Construction',
+                ]),
+                _buildFilterPill(context, "Amenities", [
+                  'Near Metro',
+                  'Near School',
+                  'Gated Society',
+                  'With Parking',
+                  'East Facing',
+                ]),
               ],
             ),
           ),
@@ -574,7 +624,11 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
     );
   }
 
-  Widget _buildFilterPill(BuildContext context, String filterName, List<String> options) {
+  Widget _buildFilterPill(
+    BuildContext context,
+    String filterName,
+    List<String> options,
+  ) {
     final provider = context.watch<AppProvider>();
     final selectedValue = provider.activeFilters[filterName];
     final isActive = selectedValue != null;
@@ -612,11 +666,7 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                   onTap: () {
                     provider.clearFilter(filterName);
                   },
-                  child: const Icon(
-                    Icons.close,
-                    size: 14,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.close, size: 14, color: Colors.white),
                 )
               else
                 Icon(
@@ -631,7 +681,11 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
     );
   }
 
-  void _showFilterOptions(BuildContext context, String filterName, List<String> options) {
+  void _showFilterOptions(
+    BuildContext context,
+    String filterName,
+    List<String> options,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -665,7 +719,10 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                         provider.clearFilter(filterName);
                         Navigator.pop(sheetContext);
                       },
-                      child: const Text('Clear', style: TextStyle(color: AppColors.error)),
+                      child: const Text(
+                        'Clear',
+                        style: TextStyle(color: AppColors.error),
+                      ),
                     ),
                 ],
               ),
@@ -679,7 +736,9 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                     label: Text(
                       option,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -690,7 +749,9 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: isSelected ? AppColors.primary : AppColors.border,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.border,
                       ),
                     ),
                     onSelected: (selected) {
@@ -709,56 +770,6 @@ class _HeroSearchWidgetState extends State<HeroSearchWidget> with TickerProvider
           ),
         );
       },
-    );
-  }
-}
-
-//--------------------------------------------------
-// STAT ITEM COMPONENT
-//--------------------------------------------------
-class _StatItem extends StatelessWidget {
-  final String value;
-  final String label;
-
-  const _StatItem({required this.value, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            color: AppColors.primary,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecond,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _VerticalDivider extends StatelessWidget {
-  final double height;
-  const _VerticalDivider({required this.height});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      height: height,
-      width: 1,
-      color: AppColors.border,
     );
   }
 }
